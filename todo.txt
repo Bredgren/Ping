@@ -1,0 +1,17 @@
+- flip (both) paddles
+- Only register controls while in game
+
+- ball
+- display time, points, etc. in game
+- end game after time limit
+- display menu items
+- display end game items
+
+- fine-tune controls
+
+- add more balls
+- add AI
+- save stats
+- add ability to unlock balls
+
+- fine-tune controls again

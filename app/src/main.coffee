@@ -1,7 +1,7 @@
 # The main script for the game
 
-#_require ./config
 #_require ./game
+#_require ./settings
 
 # Execute after document is loaded
 $ ->
