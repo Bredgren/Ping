@@ -6,16 +6,20 @@ class Paddle
   WIDTH: 10
   FORCE: 200
   MAX_VEL: 100
+  TORQUE: 10
+  MAX_SPIN: 50
   DAMPING_MOVE: 0
   DAMPING_STILL: 5
 
-  buttons:
-    up: false
-    down: false
-    left: false
-    right: false
+  buttons: null
 
   constructor: (@game, x, start_y=settings.HEIGHT/2) ->
+    @buttons =
+      up: false
+      down: false
+      left: false
+      right: false
+
     g = new PIXI.Graphics()
     g.lineStyle(1, 0xFFFFFF)
     g.drawRect(0, 0, @WIDTH, @LENGTH)
@@ -42,16 +46,48 @@ class Paddle
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_width / 2, b2_length / 2)
 
-    @body = @game.world.CreateBody(bodyDef)
-    @body.CreateFixture(fixDef)
+    @paddle_body = @game.world.CreateBody(bodyDef)
+    @paddle_body.CreateFixture(fixDef)
+
+    fixDef.density = 0.0
+    fixDef.friction = 0.0
+    fixDef.restitution = 0.0
+    fixDef.shape = new b2Shapes.b2PolygonShape()
+    fixDef.shape.SetAsBox(0.1, 0.1)
+
+    @anchor_body = @game.world.CreateBody(bodyDef)
+    @anchor_body.CreateFixture(fixDef)
+
+    jointDef = new b2Joints.b2PrismaticJointDef()
+    jointDef.bodyA = @game.top_boundary
+    jointDef.bodyB = @anchor_body
+    jointDef.collidConnected = true
+    jointDef.localAxisA = new b2Vec2(0, 1)
+    jointDef.localAnchorA = new b2Vec2(b2_x, 5)
+    jointDef.localAnchorB = new b2Vec2(0, 0)
+    # jointDef.Initialize(@game.top_boundary, @anchor_body,
+    #   # @anchor_body.GetWorldCenter(),
+    #   new b2Vec2(b2_x, 0),
+    #   new b2Vec2(0, 1))
+    # # jointDef.localAnchorA = new b2Vec2(0, 0)
+    # # jointDef.localAnchorB(new b2Vec2(, 0))
+    @game.world.CreateJoint(jointDef)
+
+    jointDef = new b2Joints.b2RevoluteJointDef()
+    jointDef.Initialize(@paddle_body, @anchor_body,
+      @anchor_body.GetWorldCenter())
+    @game.world.CreateJoint(jointDef)
 
   position: () ->
-    return @body.GetPosition()
+    return @paddle_body.GetPosition()
 
   update: () ->
-    pos = @body.GetPosition()
-    vel = @body.GetLinearVelocity()
+    body = @paddle_body
+    pos = body.GetPosition()
+    vel = body.GetLinearVelocity()
+    spin = @paddle_body.GetAngularVelocity()
 
+    # Movement
     dir = new b2Vec2(0, 0)
     if @buttons.up isnt @buttons.down
       if @buttons.up
@@ -60,20 +96,40 @@ class Paddle
         dir = new b2Vec2(0, 1)
 
     if @buttons.up or @buttons.down
-      @body.SetLinearDamping(@DAMPING_MOVE)
+      body.SetLinearDamping(@DAMPING_MOVE)
     else
-      @body.SetLinearDamping(@DAMPING_STILL)
+      body.SetLinearDamping(@DAMPING_STILL)
 
     dir.Multiply(@FORCE)
-    @body.ApplyForce(dir, pos)
+    body.ApplyForce(dir, pos)
 
     if (Math.abs(vel.x) > @MAX_VEL)
       vel.x = (if vel.x > 0 then 1 else -1) * @MAX_VEL
-      @body.SetLinearVelocity(vel)
+      body.SetLinearVelocity(vel)
 
     if (Math.abs(vel.y) > @MAX_VEL)
       vel.y = (if vel.y > 0 then 1 else -1) * @MAX_VEL
-      @body.SetLinearVelocity(vel)
+      body.SetLinearVelocity(vel)
+
+    # Rotation
+    torque = 0
+    if @buttons.left isnt @buttons.right
+      if @buttons.left
+        torque = -1
+      else if @buttons.right
+        torque = 1
+
+    torque *= @TORQUE
+    @paddle_body.ApplyTorque(torque)
+
+    # if @buttons.left or @buttons.right
+    #   @paddle_body.SetAngularDamping(@DAMPING_SPIN)
+    # else
+    #   @paddle_body.SetAngularDamping(@DAMPING_NOT_SPIN)
+
+    if (Math.abs(spin) > @MAX_SPIN)
+      spin = (if spin > 0 then 1 else -1) * @MAX_SPIN
+      @paddle_body.SetAngularVelocity(spin)
 
   draw: () ->
     pos = @position()
@@ -91,3 +147,15 @@ class Paddle
 
   endDown: () ->
     @buttons.down = false
+
+  startLeft: () ->
+    @buttons.left = true
+
+  endLeft: () ->
+    @buttons.left = false
+
+  startRight: () ->
+    @buttons.right = true
+
+  endRight: () ->
+    @buttons.right = false

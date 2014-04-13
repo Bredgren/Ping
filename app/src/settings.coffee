@@ -1,6 +1,7 @@
 
 settings = {
   DEBUG: true
+  DEBUG_DRAW: true
   PRINT_INPUT: false
   WIDTH: 1000
   HEIGHT: 500
