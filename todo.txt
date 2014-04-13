@@ -1,9 +1,7 @@
 (lower volume)
 
-- flip (both) paddles
-- Only register controls while in game
-
-- ball
+- set limit on angle of ball movement
+- fix paddle angle drift
 - display time, points, etc. in game
 - end game after time limit
 - display menu items

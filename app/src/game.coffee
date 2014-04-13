@@ -14,6 +14,7 @@ class Game
 
   left_paddle: null
   right_paddle: null
+  ball: null
 
   constructor: (@stage) ->
     @hud_stage = new PIXI.DisplayObjectContainer()
@@ -66,7 +67,6 @@ class Game
     fixDef.restitution = 0.2
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
-
     @top_boundary = @world.CreateBody(bodyDef)
     @top_boundary.CreateFixture(fixDef)
 
@@ -77,33 +77,63 @@ class Game
     @bottom_boundary = @world.CreateBody(bodyDef)
     @bottom_boundary.CreateFixture(fixDef)
 
-    @left_paddle = new Paddle(@, settings.PADDLE_X)
-    @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
+    b2_w = b2_h
+    b2_h = settings.HEIGHT / settings.PPM
+    b2_x = -offset
+    b2_y = b2_h / 2
+
+    bodyDef.position.x = b2_x
+    bodyDef.position.y = b2_y
+    fixDef.shape = new b2Shapes.b2PolygonShape()
+    fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
+    @left_boundary = @world.CreateBody(bodyDef)
+    @left_boundary.CreateFixture(fixDef)
+
+    b2_x = settings.WIDTH / settings.PPM + offset
+    bodyDef.position.x = b2_x
+    bodyDef.position.y = b2_y
+    fixDef.shape = new b2Shapes.b2PolygonShape()
+    fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
+    @right_boundary = @world.CreateBody(bodyDef)
+    @right_boundary.CreateFixture(fixDef)
 
     @gotoMenu()
 
   update: () ->
-    @left_paddle.update()
-    @right_paddle.update()
-    @world.Step(settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI)
-    @world.ClearForces()
+    if @state is @states.GAME
+      @left_paddle.update()
+      @right_paddle.update()
+      @ball.update()
+      @world.Step(
+        settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI)
+      @world.ClearForces()
 
   clear: () ->
     @hud_graphics.clear()
 
   draw: () ->
-    @left_paddle.draw()
-    @right_paddle.draw()
-    if settings.DEBUG_DRAW
-      @world.DrawDebugData()
+    if @state is @states.GAME
+      @left_paddle.draw()
+      @right_paddle.draw()
+      @ball.draw()
+      if settings.DEBUG_DRAW
+        @world.DrawDebugData()
 
   startGame: () ->
     @state = @states.GAME
     @hud_stage.removeChild(@begin_text)
+    @left_paddle = new Paddle(@, settings.PADDLE_X)
+    @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
+    center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
+    vel = {x: -500, y: 0}
+    @ball = new CircleBall(@, center, vel)
 
   endGame: () ->
     @state = @states.END
     @hud_stage.addChild(@return_text)
+    @left_paddle.destroy()
+    @right_paddle.destroy()
+    @ball.destroy()
 
   gotoMenu: () ->
     @state = @states.MENU
@@ -113,33 +143,36 @@ class Game
 
   onKeyDown: (key_code) ->
     bindings = settings.BINDINGS
-    switch key_code
-      when bindings.P1_UP
-        @left_paddle.startUp()
-      when bindings.P1_DOWN
-        @left_paddle.startDown()
-      when bindings.P1_LEFT
-        @left_paddle.startLeft()
-      when bindings.P1_RIGHT
-        @left_paddle.startRight()
-      when bindings.P2_UP
-        @right_paddle.startUp()
-      when bindings.P2_DOWN
-        @right_paddle.startDown()
-      when bindings.P2_LEFT
-        @right_paddle.startLeft()
-      when bindings.P2_RIGHT
-        @right_paddle.startRight()
-      when bindings.START
-        switch @state
-          when @states.MENU
-            @startGame()
-          when @states.END
-            @gotoMenu()
-          when @states.GAME
-            @endGame()
+    if @state is @states.GAME
+      switch key_code
+        when bindings.P1_UP
+          @left_paddle.startUp()
+        when bindings.P1_DOWN
+          @left_paddle.startDown()
+        when bindings.P1_LEFT
+          @left_paddle.startLeft()
+        when bindings.P1_RIGHT
+          @left_paddle.startRight()
+        when bindings.P2_UP
+          @right_paddle.startUp()
+        when bindings.P2_DOWN
+          @right_paddle.startDown()
+        when bindings.P2_LEFT
+          @right_paddle.startLeft()
+        when bindings.P2_RIGHT
+          @right_paddle.startRight()
+
+    if key_code is bindings.START
+      switch @state
+        when @states.MENU
+          @startGame()
+        when @states.END
+          @gotoMenu()
+        when @states.GAME
+          @endGame()
 
   onKeyUp: (key_code) ->
+    if @state isnt @states.GAME then return
     bindings = settings.BINDINGS
     switch key_code
       when bindings.P1_UP

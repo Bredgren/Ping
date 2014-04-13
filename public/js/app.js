@@ -7,7 +7,78 @@
     __slice = [].slice;
 
   CircleBall = (function() {
-    function CircleBall() {}
+    CircleBall.prototype.RADIUS = 15;
+
+    CircleBall.prototype.MIN_X_VEL = 10;
+
+    CircleBall.prototype.MIN_ANGLE = 45;
+
+    function CircleBall(game, init_pos, init_vel) {
+      var b2_radius, b2_x, b2_y, bodyDef, fixDef, g, t, vel;
+
+      this.game = game;
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawCircle(0, 0, this.RADIUS);
+      g.moveTo(0, 0);
+      g.lineTo(0, this.RADIUS);
+      t = g.generateTexture();
+      this.sprite = new PIXI.Sprite(t);
+      this.sprite.anchor.x = 0.5;
+      this.sprite.anchor.y = 0.5;
+      this.game.game_stage.addChild(this.sprite);
+      b2_radius = this.RADIUS / settings.PPM;
+      b2_x = init_pos.x / settings.PPM;
+      b2_y = init_pos.y / settings.PPM;
+      bodyDef = new b2Dynamics.b2BodyDef();
+      bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody;
+      bodyDef.position.x = b2_x;
+      bodyDef.position.y = b2_y;
+      fixDef = new b2Dynamics.b2FixtureDef();
+      fixDef.density = 0.1;
+      fixDef.friction = 0.5;
+      fixDef.restitution = 1;
+      fixDef.shape = new b2Shapes.b2CircleShape(b2_radius);
+      this.body = this.game.world.CreateBody(bodyDef);
+      this.body.CreateFixture(fixDef);
+      vel = new b2Vec2(init_vel.x / settings.PPM, init_vel.y / settings.PPM);
+      this.body.SetLinearVelocity(vel);
+    }
+
+    CircleBall.prototype.update = function() {
+      var vel;
+
+      vel = this.body.GetLinearVelocity();
+      if (Math.abs(vel.x) < this.MIN_X_VEL) {
+        vel.x = (vel.x > 0 ? 1 : -1) * this.MIN_X_VEL;
+        this.body.SetLinearVelocity(vel);
+      }
+      this.body.SetLinearVelocity(vel);
+      return console.log(Math.atan(vel.y / vel.x) * 180 / Math.PI);
+    };
+
+    CircleBall.prototype.draw = function() {
+      var pos, rot;
+
+      pos = this.body.GetPosition();
+      rot = this.body.GetAngle();
+      this.sprite.position.x = pos.x * settings.PPM;
+      this.sprite.position.y = pos.y * settings.PPM;
+      return this.sprite.rotation = rot;
+    };
+
+    CircleBall.prototype.destroy = function() {
+      var body;
+
+      body = this.game.world.GetBodyList();
+      while (body) {
+        if (body === this.body) {
+          this.game.world.DestroyBody(body);
+        }
+        body = body.GetNext();
+      }
+      return this.game.game_stage.removeChild(this.sprite);
+    };
 
     return CircleBall;
 
@@ -15,7 +86,7 @@
 
   settings = {
     DEBUG: true,
-    DEBUG_DRAW: true,
+    DEBUG_DRAW: false,
     PRINT_INPUT: false,
     WIDTH: 1000,
     HEIGHT: 500,
@@ -204,9 +275,7 @@
 
     Paddle.prototype.MAX_VEL = 100;
 
-    Paddle.prototype.TORQUE = 10;
-
-    Paddle.prototype.MAX_SPIN = 50;
+    Paddle.prototype.ANGLE = 20;
 
     Paddle.prototype.DAMPING_MOVE = 0;
 
@@ -270,8 +339,21 @@
       return this.paddle_body.GetPosition();
     };
 
+    Paddle.prototype.destroy = function() {
+      var body;
+
+      body = this.game.world.GetBodyList();
+      while (body) {
+        if (body === this.anchor_body || body === this.paddle_body) {
+          this.game.world.DestroyBody(body);
+        }
+        body = body.GetNext();
+      }
+      return this.game.game_stage.removeChild(this.sprite);
+    };
+
     Paddle.prototype.update = function() {
-      var body, dir, pos, spin, torque, vel;
+      var body, dir, pos, spin, vel;
 
       body = this.paddle_body;
       pos = body.GetPosition();
@@ -300,28 +382,26 @@
         vel.y = (vel.y > 0 ? 1 : -1) * this.MAX_VEL;
         body.SetLinearVelocity(vel);
       }
-      torque = 0;
       if (this.buttons.left !== this.buttons.right) {
         if (this.buttons.left) {
-          torque = -1;
+          body.SetAngle(-Math.PI / 180 * this.ANGLE);
         } else if (this.buttons.right) {
-          torque = 1;
+          body.SetAngle(Math.PI / 180 * this.ANGLE);
         }
       }
-      torque *= this.TORQUE;
-      body.ApplyTorque(torque);
-      if (Math.abs(spin) > this.MAX_SPIN) {
-        spin = (spin > 0 ? 1 : -1) * this.MAX_SPIN;
-        return body.SetAngularVelocity(spin);
+      if (!this.buttons.left && !this.buttons.right) {
+        return body.SetAngle(0);
       }
     };
 
     Paddle.prototype.draw = function() {
-      var pos;
+      var pos, rot;
 
       pos = this.position();
       this.sprite.position.x = pos.x * settings.PPM;
-      return this.sprite.position.y = pos.y * settings.PPM;
+      this.sprite.position.y = pos.y * settings.PPM;
+      rot = this.paddle_body.GetAngle();
+      return this.sprite.rotation = rot;
     };
 
     Paddle.prototype.startUp = function() {
@@ -372,6 +452,8 @@
     Game.prototype.left_paddle = null;
 
     Game.prototype.right_paddle = null;
+
+    Game.prototype.ball = null;
 
     function Game(stage) {
       var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, fixDef, offset, style;
@@ -431,16 +513,34 @@
       fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
       this.bottom_boundary = this.world.CreateBody(bodyDef);
       this.bottom_boundary.CreateFixture(fixDef);
-      this.left_paddle = new Paddle(this, settings.PADDLE_X);
-      this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
+      b2_w = b2_h;
+      b2_h = settings.HEIGHT / settings.PPM;
+      b2_x = -offset;
+      b2_y = b2_h / 2;
+      bodyDef.position.x = b2_x;
+      bodyDef.position.y = b2_y;
+      fixDef.shape = new b2Shapes.b2PolygonShape();
+      fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
+      this.left_boundary = this.world.CreateBody(bodyDef);
+      this.left_boundary.CreateFixture(fixDef);
+      b2_x = settings.WIDTH / settings.PPM + offset;
+      bodyDef.position.x = b2_x;
+      bodyDef.position.y = b2_y;
+      fixDef.shape = new b2Shapes.b2PolygonShape();
+      fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
+      this.right_boundary = this.world.CreateBody(bodyDef);
+      this.right_boundary.CreateFixture(fixDef);
       this.gotoMenu();
     }
 
     Game.prototype.update = function() {
-      this.left_paddle.update();
-      this.right_paddle.update();
-      this.world.Step(settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI);
-      return this.world.ClearForces();
+      if (this.state === this.states.GAME) {
+        this.left_paddle.update();
+        this.right_paddle.update();
+        this.ball.update();
+        this.world.Step(settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI);
+        return this.world.ClearForces();
+      }
     };
 
     Game.prototype.clear = function() {
@@ -448,21 +548,40 @@
     };
 
     Game.prototype.draw = function() {
-      this.left_paddle.draw();
-      this.right_paddle.draw();
-      if (settings.DEBUG_DRAW) {
-        return this.world.DrawDebugData();
+      if (this.state === this.states.GAME) {
+        this.left_paddle.draw();
+        this.right_paddle.draw();
+        this.ball.draw();
+        if (settings.DEBUG_DRAW) {
+          return this.world.DrawDebugData();
+        }
       }
     };
 
     Game.prototype.startGame = function() {
+      var center, vel;
+
       this.state = this.states.GAME;
-      return this.hud_stage.removeChild(this.begin_text);
+      this.hud_stage.removeChild(this.begin_text);
+      this.left_paddle = new Paddle(this, settings.PADDLE_X);
+      this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
+      center = {
+        x: settings.WIDTH / 2,
+        y: settings.HEIGHT / 2
+      };
+      vel = {
+        x: -500,
+        y: 0
+      };
+      return this.ball = new CircleBall(this, center, vel);
     };
 
     Game.prototype.endGame = function() {
       this.state = this.states.END;
-      return this.hud_stage.addChild(this.return_text);
+      this.hud_stage.addChild(this.return_text);
+      this.left_paddle.destroy();
+      this.right_paddle.destroy();
+      return this.ball.destroy();
     };
 
     Game.prototype.gotoMenu = function() {
@@ -479,38 +598,51 @@
       var bindings;
 
       bindings = settings.BINDINGS;
-      switch (key_code) {
-        case bindings.P1_UP:
-          return this.left_paddle.startUp();
-        case bindings.P1_DOWN:
-          return this.left_paddle.startDown();
-        case bindings.P1_LEFT:
-          return this.left_paddle.startLeft();
-        case bindings.P1_RIGHT:
-          return this.left_paddle.startRight();
-        case bindings.P2_UP:
-          return this.right_paddle.startUp();
-        case bindings.P2_DOWN:
-          return this.right_paddle.startDown();
-        case bindings.P2_LEFT:
-          return this.right_paddle.startLeft();
-        case bindings.P2_RIGHT:
-          return this.right_paddle.startRight();
-        case bindings.START:
-          switch (this.state) {
-            case this.states.MENU:
-              return this.startGame();
-            case this.states.END:
-              return this.gotoMenu();
-            case this.states.GAME:
-              return this.endGame();
-          }
+      if (this.state === this.states.GAME) {
+        switch (key_code) {
+          case bindings.P1_UP:
+            this.left_paddle.startUp();
+            break;
+          case bindings.P1_DOWN:
+            this.left_paddle.startDown();
+            break;
+          case bindings.P1_LEFT:
+            this.left_paddle.startLeft();
+            break;
+          case bindings.P1_RIGHT:
+            this.left_paddle.startRight();
+            break;
+          case bindings.P2_UP:
+            this.right_paddle.startUp();
+            break;
+          case bindings.P2_DOWN:
+            this.right_paddle.startDown();
+            break;
+          case bindings.P2_LEFT:
+            this.right_paddle.startLeft();
+            break;
+          case bindings.P2_RIGHT:
+            this.right_paddle.startRight();
+        }
+      }
+      if (key_code === bindings.START) {
+        switch (this.state) {
+          case this.states.MENU:
+            return this.startGame();
+          case this.states.END:
+            return this.gotoMenu();
+          case this.states.GAME:
+            return this.endGame();
+        }
       }
     };
 
     Game.prototype.onKeyUp = function(key_code) {
       var bindings;
 
+      if (this.state !== this.states.GAME) {
+        return;
+      }
       bindings = settings.BINDINGS;
       switch (key_code) {
         case bindings.P1_UP:

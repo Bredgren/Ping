@@ -6,8 +6,7 @@ class Paddle
   WIDTH: 10
   FORCE: 200
   MAX_VEL: 100
-  TORQUE: 10
-  MAX_SPIN: 50
+  ANGLE: 20
   DAMPING_MOVE: 0
   DAMPING_STILL: 5
 
@@ -67,11 +66,18 @@ class Paddle
     jointDef = new b2Joints.b2RevoluteJointDef()
     jointDef.Initialize(@paddle_body, @anchor_body,
       @anchor_body.GetWorldCenter())
-    # TODO: set limits
     @game.world.CreateJoint(jointDef)
 
   position: () ->
     return @paddle_body.GetPosition()
+
+  destroy: () ->
+    body = @game.world.GetBodyList()
+    while body
+      if body is @anchor_body or body is @paddle_body
+        @game.world.DestroyBody(body)
+      body = body.GetNext()
+    @game.game_stage.removeChild(@sprite)
 
   update: () ->
     body = @paddle_body
@@ -104,29 +110,21 @@ class Paddle
       body.SetLinearVelocity(vel)
 
     # Rotation
-    torque = 0
     if @buttons.left isnt @buttons.right
       if @buttons.left
-        torque = -1
+        body.SetAngle(-Math.PI / 180 * @ANGLE)
       else if @buttons.right
-        torque = 1
+        body.SetAngle(Math.PI / 180 * @ANGLE)
 
-    torque *= @TORQUE
-    body.ApplyTorque(torque)
-
-    # if @buttons.left or @buttons.right
-    #   body.SetAngularDamping(@DAMPING_SPIN)
-    # else
-    #   body.SetAngularDamping(@DAMPING_NOT_SPIN)
-
-    if (Math.abs(spin) > @MAX_SPIN)
-      spin = (if spin > 0 then 1 else -1) * @MAX_SPIN
-      body.SetAngularVelocity(spin)
+    if not @buttons.left and not @buttons.right
+      body.SetAngle(0)
 
   draw: () ->
     pos = @position()
     @sprite.position.x = pos.x * settings.PPM
     @sprite.position.y = pos.y * settings.PPM
+    rot = @paddle_body.GetAngle()
+    @sprite.rotation = rot
 
   startUp: () ->
     @buttons.up = true
