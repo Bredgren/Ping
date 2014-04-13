@@ -49,7 +49,7 @@ class Paddle
     @paddle_body = @game.world.CreateBody(bodyDef)
     @paddle_body.CreateFixture(fixDef)
 
-    fixDef.density = 0.0
+    fixDef.density = 1
     fixDef.friction = 0.0
     fixDef.restitution = 0.0
     fixDef.shape = new b2Shapes.b2PolygonShape()
@@ -59,23 +59,15 @@ class Paddle
     @anchor_body.CreateFixture(fixDef)
 
     jointDef = new b2Joints.b2PrismaticJointDef()
-    jointDef.bodyA = @game.top_boundary
-    jointDef.bodyB = @anchor_body
-    jointDef.collidConnected = true
-    jointDef.localAxisA = new b2Vec2(0, 1)
-    jointDef.localAnchorA = new b2Vec2(b2_x, 5)
-    jointDef.localAnchorB = new b2Vec2(0, 0)
-    # jointDef.Initialize(@game.top_boundary, @anchor_body,
-    #   # @anchor_body.GetWorldCenter(),
-    #   new b2Vec2(b2_x, 0),
-    #   new b2Vec2(0, 1))
-    # # jointDef.localAnchorA = new b2Vec2(0, 0)
-    # # jointDef.localAnchorB(new b2Vec2(, 0))
+    jointDef.Initialize(@game.top_boundary, @anchor_body,
+      new b2Vec2(b2_x, 0),
+      new b2Vec2(0, 1))
     @game.world.CreateJoint(jointDef)
 
     jointDef = new b2Joints.b2RevoluteJointDef()
     jointDef.Initialize(@paddle_body, @anchor_body,
       @anchor_body.GetWorldCenter())
+    # TODO: set limits
     @game.world.CreateJoint(jointDef)
 
   position: () ->
@@ -85,7 +77,7 @@ class Paddle
     body = @paddle_body
     pos = body.GetPosition()
     vel = body.GetLinearVelocity()
-    spin = @paddle_body.GetAngularVelocity()
+    spin = body.GetAngularVelocity()
 
     # Movement
     dir = new b2Vec2(0, 0)
@@ -120,16 +112,16 @@ class Paddle
         torque = 1
 
     torque *= @TORQUE
-    @paddle_body.ApplyTorque(torque)
+    body.ApplyTorque(torque)
 
     # if @buttons.left or @buttons.right
-    #   @paddle_body.SetAngularDamping(@DAMPING_SPIN)
+    #   body.SetAngularDamping(@DAMPING_SPIN)
     # else
-    #   @paddle_body.SetAngularDamping(@DAMPING_NOT_SPIN)
+    #   body.SetAngularDamping(@DAMPING_NOT_SPIN)
 
     if (Math.abs(spin) > @MAX_SPIN)
       spin = (if spin > 0 then 1 else -1) * @MAX_SPIN
-      @paddle_body.SetAngularVelocity(spin)
+      body.SetAngularVelocity(spin)
 
   draw: () ->
     pos = @position()

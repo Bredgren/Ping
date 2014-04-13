@@ -251,7 +251,7 @@
       fixDef.shape.SetAsBox(b2_width / 2, b2_length / 2);
       this.paddle_body = this.game.world.CreateBody(bodyDef);
       this.paddle_body.CreateFixture(fixDef);
-      fixDef.density = 0.0;
+      fixDef.density = 1;
       fixDef.friction = 0.0;
       fixDef.restitution = 0.0;
       fixDef.shape = new b2Shapes.b2PolygonShape();
@@ -259,12 +259,7 @@
       this.anchor_body = this.game.world.CreateBody(bodyDef);
       this.anchor_body.CreateFixture(fixDef);
       jointDef = new b2Joints.b2PrismaticJointDef();
-      jointDef.bodyA = this.game.top_boundary;
-      jointDef.bodyB = this.anchor_body;
-      jointDef.collidConnected = true;
-      jointDef.localAxisA = new b2Vec2(0, 1);
-      jointDef.localAnchorA = new b2Vec2(b2_x, 5);
-      jointDef.localAnchorB = new b2Vec2(0, 0);
+      jointDef.Initialize(this.game.top_boundary, this.anchor_body, new b2Vec2(b2_x, 0), new b2Vec2(0, 1));
       this.game.world.CreateJoint(jointDef);
       jointDef = new b2Joints.b2RevoluteJointDef();
       jointDef.Initialize(this.paddle_body, this.anchor_body, this.anchor_body.GetWorldCenter());
@@ -281,7 +276,7 @@
       body = this.paddle_body;
       pos = body.GetPosition();
       vel = body.GetLinearVelocity();
-      spin = this.paddle_body.GetAngularVelocity();
+      spin = body.GetAngularVelocity();
       dir = new b2Vec2(0, 0);
       if (this.buttons.up !== this.buttons.down) {
         if (this.buttons.up) {
@@ -314,10 +309,10 @@
         }
       }
       torque *= this.TORQUE;
-      this.paddle_body.ApplyTorque(torque);
+      body.ApplyTorque(torque);
       if (Math.abs(spin) > this.MAX_SPIN) {
         spin = (spin > 0 ? 1 : -1) * this.MAX_SPIN;
-        return this.paddle_body.SetAngularVelocity(spin);
+        return body.SetAngularVelocity(spin);
       }
     };
 
