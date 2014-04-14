@@ -1,8 +1,8 @@
 
 class CircleBall
   RADIUS: 15
-  MIN_X_VEL: 10
-  MIN_ANGLE: 45
+  MIN_X_VEL: 20
+  MAX_ANGLE: 60 / 180 * Math.PI
 
   # pos and vel in pixels
   constructor: (@game, init_pos, init_vel) ->
@@ -34,17 +34,37 @@ class CircleBall
 
     @body = @game.world.CreateBody(bodyDef)
     @body.CreateFixture(fixDef)
+    f = @body.GetFixtureList().GetFilterData()
+    f.categoryBits = settings.COLLISION_CATEGORY.BALL
+    @body.GetFixtureList().SetFilterData(f)
 
     vel = new b2Vec2(init_vel.x / settings.PPM, init_vel.y / settings.PPM)
     @body.SetLinearVelocity(vel)
 
   update: () ->
     vel = @body.GetLinearVelocity()
+    angle = Math.atan(vel.y / vel.x)
+    if (Math.abs(angle) > @MAX_ANGLE)
+      target_angle = (if angle > 0 then 1 else -1) * @MAX_ANGLE
+      dif = target_angle - angle
+      x = vel.x * Math.cos(dif) - vel.y * Math.sin(dif)
+      y = vel.x * Math.sin(dif) + vel.y * Math.cos(dif)
+      vel.x = x
+      vel.y = y
+
     if (Math.abs(vel.x) < @MIN_X_VEL)
       vel.x = (if vel.x > 0 then 1 else -1) * @MIN_X_VEL
       @body.SetLinearVelocity(vel)
+
     @body.SetLinearVelocity(vel)
-    console.log(Math.atan(vel.y / vel.x) * 180 / Math.PI)
+
+    f = @body.GetFixtureList().GetFilterData()
+    c = settings.COLLISION_CATEGORY
+    if vel.x > 0
+      f.maskBits = c.BOUNDARY | c.PADDLE_R
+    else
+      f.maskBits = c.BOUNDARY | c.PADDLE_L
+    @body.GetFixtureList().SetFilterData(f)
 
   draw: () ->
     pos = @body.GetPosition()

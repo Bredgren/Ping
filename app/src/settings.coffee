@@ -1,7 +1,7 @@
 
 settings = {
   DEBUG: true
-  DEBUG_DRAW: false
+  DEBUG_DRAW: true
   PRINT_INPUT: false
   WIDTH: 1000
   HEIGHT: 500
@@ -23,6 +23,12 @@ settings = {
     P2_LEFT:  37
     P2_RIGHT: 39
     START:    32
+
+  COLLISION_CATEGORY:
+    PADDLE_L: 0x0001
+    PADDLE_R: 0x0002
+    BALL:     0x0004
+    BOUNDARY: 0x0008
 }
 
 b2Common = Box2D.Common

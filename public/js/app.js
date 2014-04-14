@@ -9,12 +9,12 @@
   CircleBall = (function() {
     CircleBall.prototype.RADIUS = 15;
 
-    CircleBall.prototype.MIN_X_VEL = 10;
+    CircleBall.prototype.MIN_X_VEL = 20;
 
-    CircleBall.prototype.MIN_ANGLE = 45;
+    CircleBall.prototype.MAX_ANGLE = 60 / 180 * Math.PI;
 
     function CircleBall(game, init_pos, init_vel) {
-      var b2_radius, b2_x, b2_y, bodyDef, fixDef, g, t, vel;
+      var b2_radius, b2_x, b2_y, bodyDef, f, fixDef, g, t, vel;
 
       this.game = game;
       g = new PIXI.Graphics();
@@ -41,20 +41,39 @@
       fixDef.shape = new b2Shapes.b2CircleShape(b2_radius);
       this.body = this.game.world.CreateBody(bodyDef);
       this.body.CreateFixture(fixDef);
+      f = this.body.GetFixtureList().GetFilterData();
+      f.categoryBits = settings.COLLISION_CATEGORY.BALL;
+      this.body.GetFixtureList().SetFilterData(f);
       vel = new b2Vec2(init_vel.x / settings.PPM, init_vel.y / settings.PPM);
       this.body.SetLinearVelocity(vel);
     }
 
     CircleBall.prototype.update = function() {
-      var vel;
+      var angle, c, dif, f, target_angle, vel, x, y;
 
       vel = this.body.GetLinearVelocity();
+      angle = Math.atan(vel.y / vel.x);
+      if (Math.abs(angle) > this.MAX_ANGLE) {
+        target_angle = (angle > 0 ? 1 : -1) * this.MAX_ANGLE;
+        dif = target_angle - angle;
+        x = vel.x * Math.cos(dif) - vel.y * Math.sin(dif);
+        y = vel.x * Math.sin(dif) + vel.y * Math.cos(dif);
+        vel.x = x;
+        vel.y = y;
+      }
       if (Math.abs(vel.x) < this.MIN_X_VEL) {
         vel.x = (vel.x > 0 ? 1 : -1) * this.MIN_X_VEL;
         this.body.SetLinearVelocity(vel);
       }
       this.body.SetLinearVelocity(vel);
-      return console.log(Math.atan(vel.y / vel.x) * 180 / Math.PI);
+      f = this.body.GetFixtureList().GetFilterData();
+      c = settings.COLLISION_CATEGORY;
+      if (vel.x > 0) {
+        f.maskBits = c.BOUNDARY | c.PADDLE_R;
+      } else {
+        f.maskBits = c.BOUNDARY | c.PADDLE_L;
+      }
+      return this.body.GetFixtureList().SetFilterData(f);
     };
 
     CircleBall.prototype.draw = function() {
@@ -86,7 +105,7 @@
 
   settings = {
     DEBUG: true,
-    DEBUG_DRAW: false,
+    DEBUG_DRAW: true,
     PRINT_INPUT: false,
     WIDTH: 1000,
     HEIGHT: 500,
@@ -105,6 +124,12 @@
       P2_LEFT: 37,
       P2_RIGHT: 39,
       START: 32
+    },
+    COLLISION_CATEGORY: {
+      PADDLE_L: 0x0001,
+      PADDLE_R: 0x0002,
+      BALL: 0x0004,
+      BOUNDARY: 0x0008
     }
   };
 
@@ -284,7 +309,7 @@
     Paddle.prototype.buttons = null;
 
     function Paddle(game, x, start_y) {
-      var b2_length, b2_width, b2_x, b2_y, bodyDef, fixDef, g, jointDef, t;
+      var b2_length, b2_width, b2_x, b2_y, bodyDef, f, fix, fixDef, g, jointDef, t;
 
       this.game = game;
       if (start_y == null) {
@@ -312,6 +337,7 @@
       bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody;
       bodyDef.position.x = b2_x;
       bodyDef.position.y = b2_y;
+      bodyDef.fixedRotation = true;
       fixDef = new b2Dynamics.b2FixtureDef();
       fixDef.density = 1.0;
       fixDef.friction = 0.5;
@@ -319,14 +345,25 @@
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(b2_width / 2, b2_length / 2);
       this.paddle_body = this.game.world.CreateBody(bodyDef);
-      this.paddle_body.CreateFixture(fixDef);
+      fix = this.paddle_body.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      if (x < settings.WIDTH / 2) {
+        f.categoryBits = settings.COLLISION_CATEGORY.PADDLE_L;
+      } else {
+        f.categoryBits = settings.COLLISION_CATEGORY.PADDLE_R;
+      }
+      fix.SetFilterData(f);
       fixDef.density = 1;
       fixDef.friction = 0.0;
       fixDef.restitution = 0.0;
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(0.1, 0.1);
+      bodyDef.fixedRotation = false;
       this.anchor_body = this.game.world.CreateBody(bodyDef);
-      this.anchor_body.CreateFixture(fixDef);
+      fix = this.anchor_body.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      f.categoryBits = 0;
+      fix.SetFilterData(f);
       jointDef = new b2Joints.b2PrismaticJointDef();
       jointDef.Initialize(this.game.top_boundary, this.anchor_body, new b2Vec2(b2_x, 0), new b2Vec2(0, 1));
       this.game.world.CreateJoint(jointDef);
@@ -455,8 +492,18 @@
 
     Game.prototype.ball = null;
 
+    Game.prototype.time = 0;
+
+    Game.prototype.time_limit = 60 * 5;
+
+    Game.prototype.left_score = 0;
+
+    Game.prototype.right_score = 0;
+
+    Game.prototype._loop_time = 0;
+
     function Game(stage) {
-      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, fixDef, offset, style;
+      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, offset, style;
 
       this.stage = stage;
       this.hud_stage = new PIXI.DisplayObjectContainer();
@@ -479,6 +526,23 @@
       this.begin_text.position.y = Math.round(cy - this.begin_text.height / 2);
       this.return_text.position.x = Math.round(cx - this.return_text.width / 2);
       this.return_text.position.y = Math.round(cy - this.return_text.height / 2);
+      style = {
+        font: "25px Arial",
+        fill: "#FFFFFF"
+      };
+      this.time_text = new PIXI.Text("", style);
+      this.time_text.position.x = settings.WIDTH / 2;
+      this.time_text.position.y = 10;
+      style = {
+        font: "30px Arial",
+        fill: "#FFFFFF"
+      };
+      this.left_score_text = new PIXI.Text("", style);
+      this.left_score_text.position.x = settings.WIDTH / 4;
+      this.left_score_text.position.y = 10;
+      this.right_score_text = new PIXI.Text("", style);
+      this.right_score_text.position.x = 3 * settings.WIDTH / 4;
+      this.right_score_text.position.y = 10;
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
         debug_drawer = new DebugDraw();
@@ -506,13 +570,19 @@
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
       this.top_boundary = this.world.CreateBody(bodyDef);
-      this.top_boundary.CreateFixture(fixDef);
+      fix = this.top_boundary.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY;
+      fix.SetFilterData(f);
       bodyDef.position.x = b2_x;
       bodyDef.position.y = settings.HEIGHT / settings.PPM + offset;
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
       this.bottom_boundary = this.world.CreateBody(bodyDef);
-      this.bottom_boundary.CreateFixture(fixDef);
+      fix = this.bottom_boundary.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY;
+      fix.SetFilterData(f);
       b2_w = b2_h;
       b2_h = settings.HEIGHT / settings.PPM;
       b2_x = -offset;
@@ -522,24 +592,42 @@
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
       this.left_boundary = this.world.CreateBody(bodyDef);
-      this.left_boundary.CreateFixture(fixDef);
+      fix = this.left_boundary.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY;
+      fix.SetFilterData(f);
       b2_x = settings.WIDTH / settings.PPM + offset;
       bodyDef.position.x = b2_x;
       bodyDef.position.y = b2_y;
       fixDef.shape = new b2Shapes.b2PolygonShape();
       fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2);
       this.right_boundary = this.world.CreateBody(bodyDef);
-      this.right_boundary.CreateFixture(fixDef);
+      fix = this.right_boundary.CreateFixture(fixDef);
+      f = fix.GetFilterData();
+      f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY;
+      fix.SetFilterData(f);
       this.gotoMenu();
     }
 
     Game.prototype.update = function() {
+      var dt, t;
+
+      t = (new Date()).getTime();
+      dt = t - this._loop_time;
+      this._loop_time = t;
       if (this.state === this.states.GAME) {
+        this.time -= dt / 1000;
+        this.time_text.setText("" + Math.round(this.time));
+        this.time_text.x = settings.WIDTH / 2 - this.time_text.width / 2;
+        if (this.time <= 0) {
+          this.endGame();
+        }
         this.left_paddle.update();
         this.right_paddle.update();
         this.ball.update();
         this.world.Step(settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI);
-        return this.world.ClearForces();
+        this.world.ClearForces();
+        return this._checkContacts();
       }
     };
 
@@ -558,6 +646,16 @@
       }
     };
 
+    Game.prototype.scoreRight = function() {
+      this.right_score++;
+      return this.right_score_text.setText("" + this.right_score);
+    };
+
+    Game.prototype.scoreLeft = function() {
+      this.left_score++;
+      return this.left_score_text.setText("" + this.left_score);
+    };
+
     Game.prototype.startGame = function() {
       var center, vel;
 
@@ -570,10 +668,19 @@
         y: settings.HEIGHT / 2
       };
       vel = {
-        x: -500,
+        x: -50,
         y: 0
       };
-      return this.ball = new CircleBall(this, center, vel);
+      this.ball = new CircleBall(this, center, vel);
+      this.time = this.time_limit;
+      this.left_score = 0;
+      this.right_score = 0;
+      this.time_text.setText("" + this.time);
+      this.left_score_text.setText("" + this.left_score);
+      this.right_score_text.setText("" + this.right_score);
+      this.hud_stage.addChild(this.time_text);
+      this.hud_stage.addChild(this.left_score_text);
+      return this.hud_stage.addChild(this.right_score_text);
     };
 
     Game.prototype.endGame = function() {
@@ -590,7 +697,10 @@
       this.state = this.states.MENU;
       this.hud_stage.addChild(this.begin_text);
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
-        return this.hud_stage.removeChild(this.return_text);
+        this.hud_stage.removeChild(this.return_text);
+        this.hud_stage.removeChild(this.time_text);
+        this.hud_stage.removeChild(this.left_score_text);
+        return this.hud_stage.removeChild(this.right_score_text);
       }
     };
 
@@ -671,6 +781,40 @@
     Game.prototype.onMouseMove = function(screen_pos) {};
 
     Game.prototype.onMouseWheel = function(delta) {};
+
+    Game.prototype._checkContacts = function() {
+      var ball, bodyA, bodyB, contact, vel, _results;
+
+      contact = this.world.GetContactList();
+      _results = [];
+      while (contact) {
+        if (contact.IsTouching()) {
+          bodyA = contact.GetFixtureA().GetBody();
+          bodyB = contact.GetFixtureB().GetBody();
+          if (bodyA === this.ball.body || bodyB === this.ball.body) {
+            if (bodyA === this.left_boundary || bodyB === this.left_boundary) {
+              this.scoreRight();
+            } else if (bodyA === this.right_boundary || bodyB === this.right_boundary) {
+              this.scoreLeft();
+            } else if (bodyA === this.left_paddle.paddle_body || bodyB === this.left_paddle.paddle_body) {
+              ball = this.ball.body;
+              vel = ball.GetLinearVelocity();
+              if (vel.x > 0) {
+                contact.SetEnabled(false);
+              }
+            } else if (bodyA === this.right_paddle.paddle_body || bodyB === this.right_paddle.paddle_body) {
+              ball = this.ball.body;
+              vel = ball.GetLinearVelocity();
+              if (vel.x < 0) {
+                contact.SetEnabled(false);
+              }
+            }
+          }
+        }
+        _results.push(contact = contact.GetNext());
+      }
+      return _results;
+    };
 
     return Game;
 

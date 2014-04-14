@@ -15,6 +15,12 @@ class Game
   left_paddle: null
   right_paddle: null
   ball: null
+  time: 0
+  time_limit: 60 * 5
+  left_score: 0
+  right_score: 0
+
+  _loop_time: 0
 
   constructor: (@stage) ->
     @hud_stage = new PIXI.DisplayObjectContainer()
@@ -30,13 +36,24 @@ class Game
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
     @return_text = new PIXI.Text("Press SPACE to return to menu", style)
-
     cx = settings.WIDTH / 2
     cy = settings.HEIGHT / 2
     @begin_text.position.x = Math.round(cx - @begin_text.width / 2)
     @begin_text.position.y = Math.round(cy - @begin_text.height / 2)
     @return_text.position.x = Math.round(cx - @return_text.width / 2)
     @return_text.position.y = Math.round(cy - @return_text.height / 2)
+
+    style = {font: "25px Arial", fill: "#FFFFFF"}
+    @time_text = new PIXI.Text("", style)
+    @time_text.position.x = settings.WIDTH / 2
+    @time_text.position.y = 10
+    style = {font: "30px Arial", fill: "#FFFFFF"}
+    @left_score_text = new PIXI.Text("", style)
+    @left_score_text.position.x = settings.WIDTH / 4
+    @left_score_text.position.y = 10
+    @right_score_text = new PIXI.Text("", style)
+    @right_score_text.position.x = 3 * settings.WIDTH / 4
+    @right_score_text.position.y = 10
 
     @world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep=false)
     if settings.DEBUG_DRAW
@@ -68,45 +85,71 @@ class Game
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
     @top_boundary = @world.CreateBody(bodyDef)
-    @top_boundary.CreateFixture(fixDef)
+    fix = @top_boundary.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
+    fix.SetFilterData(f)
+
 
     bodyDef.position.x = b2_x
-    bodyDef.position.y = settings.HEIGHT / settings.PPM + offset
+    bodyDef.position.y = settings.HEIGHT / settings.PPM + offset  #
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
     @bottom_boundary = @world.CreateBody(bodyDef)
-    @bottom_boundary.CreateFixture(fixDef)
+    fix = @bottom_boundary.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
+    fix.SetFilterData(f)
+
 
     b2_w = b2_h
-    b2_h = settings.HEIGHT / settings.PPM
+    b2_h = settings.HEIGHT / settings.PPM  #
     b2_x = -offset
-    b2_y = b2_h / 2
+    b2_y = b2_h / 2  #
 
     bodyDef.position.x = b2_x
     bodyDef.position.y = b2_y
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
     @left_boundary = @world.CreateBody(bodyDef)
-    @left_boundary.CreateFixture(fixDef)
+    fix = @left_boundary.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
+    fix.SetFilterData(f)
 
-    b2_x = settings.WIDTH / settings.PPM + offset
+    b2_x = settings.WIDTH / settings.PPM + offset  #
     bodyDef.position.x = b2_x
     bodyDef.position.y = b2_y
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(b2_w / 2, b2_h / 2)
     @right_boundary = @world.CreateBody(bodyDef)
-    @right_boundary.CreateFixture(fixDef)
+    fix = @right_boundary.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
+    fix.SetFilterData(f)
 
     @gotoMenu()
 
   update: () ->
+    t = (new Date()).getTime()
+    dt = t - @_loop_time
+    @_loop_time = t
+
     if @state is @states.GAME
+      @time -= dt / 1000
+      @time_text.setText("" + Math.round(@time))
+      @time_text.x = settings.WIDTH / 2 - @time_text.width / 2
+      if @time <= 0
+        @endGame()
+
       @left_paddle.update()
       @right_paddle.update()
       @ball.update()
       @world.Step(
         settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI)
       @world.ClearForces()
+
+      @_checkContacts()
 
   clear: () ->
     @hud_graphics.clear()
@@ -119,14 +162,34 @@ class Game
       if settings.DEBUG_DRAW
         @world.DrawDebugData()
 
+  scoreRight: () ->
+    @right_score++
+    @right_score_text.setText("" + @right_score)
+
+  scoreLeft: () ->
+    @left_score++
+    @left_score_text.setText("" + @left_score)
+
   startGame: () ->
     @state = @states.GAME
     @hud_stage.removeChild(@begin_text)
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
     center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
-    vel = {x: -500, y: 0}
+    vel = {x: -50, y: 0}
     @ball = new CircleBall(@, center, vel)
+
+    @time = @time_limit
+    @left_score = 0
+    @right_score = 0
+
+    @time_text.setText("" + @time)
+    @left_score_text.setText("" + @left_score)
+    @right_score_text.setText("" + @right_score)
+
+    @hud_stage.addChild(@time_text)
+    @hud_stage.addChild(@left_score_text)
+    @hud_stage.addChild(@right_score_text)
 
   endGame: () ->
     @state = @states.END
@@ -140,6 +203,9 @@ class Game
     @hud_stage.addChild(@begin_text)
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)
+      @hud_stage.removeChild(@time_text)
+      @hud_stage.removeChild(@left_score_text)
+      @hud_stage.removeChild(@right_score_text)
 
   onKeyDown: (key_code) ->
     bindings = settings.BINDINGS
@@ -199,3 +265,34 @@ class Game
   onMouseMove: (screen_pos) ->
 
   onMouseWheel: (delta) ->
+
+  _checkContacts: () ->
+    contact = @world.GetContactList()
+    while contact
+      if contact.IsTouching()
+        bodyA = contact.GetFixtureA().GetBody()
+        bodyB = contact.GetFixtureB().GetBody()
+        if bodyA is @ball.body or bodyB is @ball.body
+          if bodyA is @left_boundary or bodyB is @left_boundary
+            @scoreRight()
+          else if bodyA is @right_boundary or bodyB is @right_boundary
+            @scoreLeft()
+          else if (bodyA is @left_paddle.paddle_body or
+                   bodyB is @left_paddle.paddle_body)
+            # paddle = @left_paddle.paddle_body
+            ball = @ball.body
+            # man = new b2Collision.b2WorldManifold()
+            # contact.GetWorldManifold(man)
+            # vel_p = ball.GetLinearVelocityFromWorldPoint(
+            vel = ball.GetLinearVelocity()
+            if vel.x > 0
+              contact.SetEnabled(false)
+          else if (bodyA is @right_paddle.paddle_body or
+                   bodyB is @right_paddle.paddle_body)
+            ball = @ball.body
+            # paddle = @right_paddle.paddle_body
+            vel = ball.GetLinearVelocity()
+            if vel.x < 0
+              contact.SetEnabled(false)
+
+      contact = contact.GetNext()

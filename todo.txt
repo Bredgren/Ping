@@ -1,9 +1,5 @@
 (lower volume)
 
-- set limit on angle of ball movement
-- fix paddle angle drift
-- display time, points, etc. in game
-- end game after time limit
 - display menu items
 - display end game items
 
@@ -14,5 +10,6 @@
 - add AI
 - save stats
 - add ability to unlock balls
+- prevent ball from getting stuck behind paddles
 
 - fine-tune controls again

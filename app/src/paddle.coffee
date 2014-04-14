@@ -37,6 +37,7 @@ class Paddle
     bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody
     bodyDef.position.x = b2_x
     bodyDef.position.y = b2_y
+    bodyDef.fixedRotation = true
 
     fixDef = new b2Dynamics.b2FixtureDef()
     fixDef.density = 1.0
@@ -46,7 +47,13 @@ class Paddle
     fixDef.shape.SetAsBox(b2_width / 2, b2_length / 2)
 
     @paddle_body = @game.world.CreateBody(bodyDef)
-    @paddle_body.CreateFixture(fixDef)
+    fix = @paddle_body.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    if x < settings.WIDTH / 2
+      f.categoryBits = settings.COLLISION_CATEGORY.PADDLE_L
+    else
+      f.categoryBits = settings.COLLISION_CATEGORY.PADDLE_R
+    fix.SetFilterData(f)
 
     fixDef.density = 1
     fixDef.friction = 0.0
@@ -54,8 +61,12 @@ class Paddle
     fixDef.shape = new b2Shapes.b2PolygonShape()
     fixDef.shape.SetAsBox(0.1, 0.1)
 
+    bodyDef.fixedRotation = false
     @anchor_body = @game.world.CreateBody(bodyDef)
-    @anchor_body.CreateFixture(fixDef)
+    fix = @anchor_body.CreateFixture(fixDef)
+    f = fix.GetFilterData()
+    f.categoryBits = 0
+    fix.SetFilterData(f)
 
     jointDef = new b2Joints.b2PrismaticJointDef()
     jointDef.Initialize(@game.top_boundary, @anchor_body,
