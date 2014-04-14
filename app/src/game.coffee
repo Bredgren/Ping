@@ -89,8 +89,47 @@ class Game
       Math.round(settings.WIDTH - cx * 0.6 - @controls2.width / 2)
     @controls2.position.y = Math.round(cy * 0.65)
 
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.drawRect(0, 0, 75, 25)
+    human = g.generateTexture()
+    g = new PIXI.Graphics()
+    g.beginFill(0xFFFFFF)
+    g.drawRect(0, 0, 75, 25)
+    g.endFill()
+    human_selected = g.generateTexture()
+    @human_box = new PIXI.Sprite(human)
+    @human_box.interactive = true
+    @human_box.hitArea = new PIXI.Rectangle(10, 25/2, 75, 25)
+    @human_box.mouseover = (data) ->
+      @setTexture(human_selected)
+    @human_box.mouseout = (data) ->
+      @setTexture(human)
+    # style = {font: "15px Arial", fill: "#000000"}
+    # @human_selected_text = new PIXI.Text("Human", style)
+    x = settings.WIDTH - cx / 3
+    y = cy * 0.7
+    # @human_selected_box.x = Math.round(x - @human_selected_box.width / 2)
+    # @human_selected_box.y = Math.round(y - @human_selected_box.height / 2)
+    # @human_selected_text.x = Math.round(x - @human_selected_text.width / 2)
+    # @human_selected_text.y = Math.round(y - @human_selected_text.height / 2)
+    @human_box.x = Math.round(x - @human_box.width / 2)
+    @human_box.y = Math.round(y - @human_box.height / 2)
+
     # g = new PIXI.Graphics()
-    # g.fillStyle
+    # g.lineStyle(1, 0xFFFFFF)
+    # g.drawRect(0, 0, 75, 25)
+    # @ai_norm_select_box = new PIXI.Sprite(g.generateTexture())
+    # style = {font: "15px Arial", fill: "#FFFFFF"}
+    # @ai_norm_select_text = new PIXI.Text("Normal AI", style)
+    # x = settings.WIDTH - cx / 3
+    # y = cy * 0.8
+    # @ai_norm_select_box.x = Math.round(x - @ai_normal_selected_box.width / 2)
+    # @ai_norm_select_box.y = Math.round(y - @ai_normal_selected_box.height / 2)
+    # @ai_normal_select_text.x =
+    #   Math.round(x - @ai_normal_selected_text.width / 2)
+    # @ai_normal_select_text.y =
+    #   Math.round(y - @ai_normal_selected_text.height / 2)
 
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
@@ -236,6 +275,12 @@ class Game
     @hud_stage.removeChild(@controls1_text)
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
+    if @human_box in @hud_stage.children
+      @hud_stage.removeChild(@human_box)
+    # if @human_selected_text in @hud_stage.children
+    #   @hud_stage.removeChild(@human_selected_text)
+    # if @ai_norm_select_text in @hud_stage.children
+    #   @hud_stage.removeChild(@ai_norm_select_text)
 
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
@@ -271,6 +316,8 @@ class Game
     @hud_stage.addChild(@controls1_text)
     if @_player2_type is "human"
       @hud_stage.addChild(@controls2)
+      @hud_stage.addChild(@human_box)
+      # @hud_stage.addChild(@human_selected_text)
 
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)

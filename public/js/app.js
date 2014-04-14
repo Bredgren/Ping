@@ -524,7 +524,7 @@
     Game.prototype._player2_type = "human";
 
     function Game(stage) {
-      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, offset, style, w;
+      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, style, w, x, y;
 
       this.stage = stage;
       this.hud_stage = new PIXI.DisplayObjectContainer();
@@ -584,6 +584,28 @@
       this.controls2 = new PIXI.Sprite(g.generateTexture());
       this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6 - this.controls2.width / 2);
       this.controls2.position.y = Math.round(cy * 0.65);
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawRect(0, 0, 75, 25);
+      human = g.generateTexture();
+      g = new PIXI.Graphics();
+      g.beginFill(0xFFFFFF);
+      g.drawRect(0, 0, 75, 25);
+      g.endFill();
+      human_selected = g.generateTexture();
+      this.human_box = new PIXI.Sprite(human);
+      this.human_box.interactive = true;
+      this.human_box.hitArea = new PIXI.Rectangle(10, 25 / 2, 75, 25);
+      this.human_box.mouseover = function(data) {
+        return this.setTexture(human_selected);
+      };
+      this.human_box.mouseout = function(data) {
+        return this.setTexture(human);
+      };
+      x = settings.WIDTH - cx / 3;
+      y = cy * 0.7;
+      this.human_box.x = Math.round(x - this.human_box.width / 2);
+      this.human_box.y = Math.round(y - this.human_box.height / 2);
       style = {
         font: "15px Arial",
         fill: "#FFFFFF"
@@ -725,7 +747,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, vel, _ref;
+      var center, vel, _ref, _ref1;
 
       this.state = this.states.GAME;
       this.hud_stage.removeChild(this.begin_text);
@@ -735,6 +757,9 @@
       this.hud_stage.removeChild(this.controls1_text);
       if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.controls2);
+      }
+      if (_ref1 = this.human_box, __indexOf.call(this.hud_stage.children, _ref1) >= 0) {
+        this.hud_stage.removeChild(this.human_box);
       }
       this.left_paddle = new Paddle(this, settings.PADDLE_X);
       this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
@@ -777,6 +802,7 @@
       this.hud_stage.addChild(this.controls1_text);
       if (this._player2_type === "human") {
         this.hud_stage.addChild(this.controls2);
+        this.hud_stage.addChild(this.human_box);
       }
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.return_text);
