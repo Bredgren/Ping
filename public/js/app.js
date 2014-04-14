@@ -513,7 +513,7 @@
 
     Game.prototype.time = 0;
 
-    Game.prototype.time_limit = 60 * 5;
+    Game.prototype.time_limit = 60 * 2;
 
     Game.prototype.left_score = 0;
 
@@ -521,8 +521,10 @@
 
     Game.prototype._loop_time = 0;
 
+    Game.prototype._player2_type = "human";
+
     function Game(stage) {
-      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, offset, style;
+      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, offset, style, w;
 
       this.stage = stage;
       this.hud_stage = new PIXI.DisplayObjectContainer();
@@ -533,14 +535,61 @@
       this.stage.addChild(this.hud_stage);
       this.hud_graphics = new PIXI.Graphics();
       this.hud_stage.addChild(this.hud_graphics);
+      cx = settings.WIDTH / 2;
+      cy = settings.HEIGHT / 2;
+      style = {
+        font: "100px Arial",
+        fill: "#FFFFFF"
+      };
+      this.title_text = new PIXI.Text("Ping", style);
+      this.title_text.position.x = cx - this.title_text.width / 2;
+      this.title_text.position.y = cy / 3;
+      style = {
+        font: "20px Arial",
+        fill: "#FFFFFF"
+      };
+      this.player1_text = new PIXI.Text("Player 1", style);
+      this.player1_text.position.x = cx / 3 - this.player1_text.width / 2;
+      this.player1_text.position.y = cy / 2;
+      this.player2_text = new PIXI.Text("Player 2", style);
+      this.player2_text.position.x = settings.WIDTH - cx / 3 - this.player2_text.width / 2;
+      this.player2_text.position.y = cy / 2;
+      this.controls1_text = new PIXI.Text("  W\nA S D", style);
+      this.controls1_text.position.x = Math.round(cx / 3 - this.controls1_text.width / 2);
+      this.controls1_text.position.y = Math.round(cy * 0.75);
+      w = 75;
+      h = 75;
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.moveTo(w / 2, h * 0.4);
+      g.lineTo(w / 2, 0);
+      g.lineTo(w * 0.4, h * 0.2);
+      g.moveTo(w / 2, 0);
+      g.lineTo(w * 0.6, h * 0.2);
+      g.moveTo(w / 2, h * 0.6);
+      g.lineTo(w / 2, h);
+      g.lineTo(w * 0.4, h * 0.8);
+      g.moveTo(w / 2, h);
+      g.lineTo(w * 0.6, h * 0.8);
+      g.moveTo(w * 0.4, h / 2);
+      g.lineTo(0, h / 2);
+      g.lineTo(w * 0.2, h * 0.4);
+      g.moveTo(0, h / 2);
+      g.lineTo(w * 0.2, h * 0.6);
+      g.moveTo(w * 0.6, h / 2);
+      g.lineTo(w, h / 2);
+      g.lineTo(w * 0.8, h * 0.4);
+      g.moveTo(w, h / 2);
+      g.lineTo(w * 0.8, h * 0.6);
+      this.controls2 = new PIXI.Sprite(g.generateTexture());
+      this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6 - this.controls2.width / 2);
+      this.controls2.position.y = Math.round(cy * 0.65);
       style = {
         font: "15px Arial",
         fill: "#FFFFFF"
       };
       this.begin_text = new PIXI.Text("Press SPACE to begin", style);
       this.return_text = new PIXI.Text("Press SPACE to return to menu", style);
-      cx = settings.WIDTH / 2;
-      cy = settings.HEIGHT / 2;
       this.begin_text.position.x = Math.round(cx - this.begin_text.width / 2);
       this.begin_text.position.y = Math.round(cy - this.begin_text.height / 2);
       this.return_text.position.x = Math.round(cx - this.return_text.width / 2);
@@ -676,10 +725,17 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, vel;
+      var center, vel, _ref;
 
       this.state = this.states.GAME;
       this.hud_stage.removeChild(this.begin_text);
+      this.hud_stage.removeChild(this.title_text);
+      this.hud_stage.removeChild(this.player1_text);
+      this.hud_stage.removeChild(this.player2_text);
+      this.hud_stage.removeChild(this.controls1_text);
+      if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
+        this.hud_stage.removeChild(this.controls2);
+      }
       this.left_paddle = new Paddle(this, settings.PADDLE_X);
       this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
       center = {
@@ -711,14 +767,27 @@
     };
 
     Game.prototype.gotoMenu = function() {
-      var _ref;
+      var _ref, _ref1, _ref2, _ref3;
 
       this.state = this.states.MENU;
       this.hud_stage.addChild(this.begin_text);
+      this.hud_stage.addChild(this.title_text);
+      this.hud_stage.addChild(this.player1_text);
+      this.hud_stage.addChild(this.player2_text);
+      this.hud_stage.addChild(this.controls1_text);
+      if (this._player2_type === "human") {
+        this.hud_stage.addChild(this.controls2);
+      }
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.return_text);
+      }
+      if (_ref1 = this.time_text, __indexOf.call(this.hud_stage.children, _ref1) >= 0) {
         this.hud_stage.removeChild(this.time_text);
+      }
+      if (_ref2 = this.left_score_text, __indexOf.call(this.hud_stage.children, _ref2) >= 0) {
         this.hud_stage.removeChild(this.left_score_text);
+      }
+      if (_ref3 = this.right_score_text, __indexOf.call(this.hud_stage.children, _ref3) >= 0) {
         return this.hud_stage.removeChild(this.right_score_text);
       }
     };

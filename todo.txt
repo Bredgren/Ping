@@ -1,6 +1,5 @@
 (lower volume)
 
-- air drag
 - display menu items
 - display end game items
 

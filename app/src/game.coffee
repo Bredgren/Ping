@@ -16,11 +16,13 @@ class Game
   right_paddle: null
   ball: null
   time: 0
-  time_limit: 60 * 5
+  time_limit: 60 * 2
   left_score: 0
   right_score: 0
 
   _loop_time: 0
+
+  _player2_type: "human"
 
   constructor: (@stage) ->
     @hud_stage = new PIXI.DisplayObjectContainer()
@@ -33,11 +35,66 @@ class Game
     @hud_graphics = new PIXI.Graphics()
     @hud_stage.addChild(@hud_graphics)
 
+    cx = settings.WIDTH / 2
+    cy = settings.HEIGHT / 2
+
+    style = {font: "100px Arial", fill: "#FFFFFF"}
+    @title_text = new PIXI.Text("Ping", style)
+    @title_text.position.x = cx - @title_text.width / 2
+    @title_text.position.y = cy / 3
+
+    style = {font: "20px Arial", fill: "#FFFFFF"}
+    @player1_text = new PIXI.Text("Player 1", style)
+    @player1_text.position.x = cx / 3 - @player1_text.width / 2
+    @player1_text.position.y = cy / 2
+
+    @player2_text = new PIXI.Text("Player 2", style)
+    @player2_text.position.x = settings.WIDTH - cx / 3 - @player2_text.width / 2
+    @player2_text.position.y = cy / 2
+
+    @controls1_text = new PIXI.Text("  W\nA S D", style)
+    @controls1_text.position.x = Math.round(cx / 3 - @controls1_text.width / 2)
+    @controls1_text.position.y = Math.round(cy * 0.75)
+
+    w = 75
+    h = 75
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.moveTo(w / 2, h * 0.4)
+    g.lineTo(w / 2, 0)
+    g.lineTo(w * 0.4, h * 0.2)
+    g.moveTo(w / 2, 0)
+    g.lineTo(w * 0.6, h * 0.2)
+
+    g.moveTo(w / 2, h * 0.6)
+    g.lineTo(w / 2, h)
+    g.lineTo(w * 0.4, h * 0.8)
+    g.moveTo(w / 2, h)
+    g.lineTo(w * 0.6, h * 0.8)
+
+    g.moveTo(w * 0.4, h / 2)
+    g.lineTo(0, h  / 2)
+    g.lineTo(w * 0.2, h * 0.4)
+    g.moveTo(0, h / 2)
+    g.lineTo(w * 0.2, h * 0.6)
+
+    g.moveTo(w * 0.6, h / 2)
+    g.lineTo(w, h  / 2)
+    g.lineTo(w * 0.8, h * 0.4)
+    g.moveTo(w, h / 2)
+    g.lineTo(w * 0.8, h * 0.6)
+
+    @controls2 = new PIXI.Sprite(g.generateTexture())
+    @controls2.position.x =
+      Math.round(settings.WIDTH - cx * 0.6 - @controls2.width / 2)
+    @controls2.position.y = Math.round(cy * 0.65)
+
+    # g = new PIXI.Graphics()
+    # g.fillStyle
+
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
     @return_text = new PIXI.Text("Press SPACE to return to menu", style)
-    cx = settings.WIDTH / 2
-    cy = settings.HEIGHT / 2
     @begin_text.position.x = Math.round(cx - @begin_text.width / 2)
     @begin_text.position.y = Math.round(cy - @begin_text.height / 2)
     @return_text.position.x = Math.round(cx - @return_text.width / 2)
@@ -173,6 +230,13 @@ class Game
   startGame: () ->
     @state = @states.GAME
     @hud_stage.removeChild(@begin_text)
+    @hud_stage.removeChild(@title_text)
+    @hud_stage.removeChild(@player1_text)
+    @hud_stage.removeChild(@player2_text)
+    @hud_stage.removeChild(@controls1_text)
+    if @controls2 in @hud_stage.children
+      @hud_stage.removeChild(@controls2)
+
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
     center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
@@ -201,10 +265,20 @@ class Game
   gotoMenu: () ->
     @state = @states.MENU
     @hud_stage.addChild(@begin_text)
+    @hud_stage.addChild(@title_text)
+    @hud_stage.addChild(@player1_text)
+    @hud_stage.addChild(@player2_text)
+    @hud_stage.addChild(@controls1_text)
+    if @_player2_type is "human"
+      @hud_stage.addChild(@controls2)
+
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)
+    if @time_text in @hud_stage.children
       @hud_stage.removeChild(@time_text)
+    if @left_score_text in @hud_stage.children
       @hud_stage.removeChild(@left_score_text)
+    if @right_score_text in @hud_stage.children
       @hud_stage.removeChild(@right_score_text)
 
   onKeyDown: (key_code) ->
