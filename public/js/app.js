@@ -13,6 +13,8 @@
 
     CircleBall.prototype.MAX_ANGLE = 60 / 180 * Math.PI;
 
+    CircleBall.prototype.MAGNUS_SCALE = .05;
+
     function CircleBall(game, init_pos, init_vel) {
       var b2_radius, b2_x, b2_y, bodyDef, f, fixDef, g, t, vel;
 
@@ -49,7 +51,7 @@
     }
 
     CircleBall.prototype.update = function() {
-      var angle, c, dif, f, target_angle, vel, x, y;
+      var angle, c, dif, f, mag, magnus_dir, magnus_force, magnus_unit, spin, target_angle, vel, x, y;
 
       vel = this.body.GetLinearVelocity();
       angle = Math.atan(vel.y / vel.x);
@@ -66,6 +68,23 @@
         this.body.SetLinearVelocity(vel);
       }
       this.body.SetLinearVelocity(vel);
+      spin = this.body.GetAngularVelocity();
+      magnus_dir = {
+        x: -vel.y,
+        y: vel.x
+      };
+      if (spin > 0) {
+        magnus_dir.x *= -1;
+        magnus_dir.y *= -1;
+      }
+      mag = Math.sqrt(magnus_dir.x * magnus_dir.x + magnus_dir.y * magnus_dir.y);
+      magnus_unit = {
+        x: magnus_dir.x / mag,
+        y: magnus_dir.y / mag
+      };
+      mag = spin * this.MAGNUS_SCALE;
+      magnus_force = new b2Vec2(magnus_unit.x * mag, magnus_unit.y * mag);
+      this.body.ApplyForce(magnus_force, this.body.GetPosition());
       f = this.body.GetFixtureList().GetFilterData();
       c = settings.COLLISION_CATEGORY;
       if (vel.x > 0) {
@@ -105,7 +124,7 @@
 
   settings = {
     DEBUG: true,
-    DEBUG_DRAW: true,
+    DEBUG_DRAW: false,
     PRINT_INPUT: false,
     WIDTH: 1000,
     HEIGHT: 500,

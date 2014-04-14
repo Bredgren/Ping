@@ -3,6 +3,7 @@ class CircleBall
   RADIUS: 15
   MIN_X_VEL: 20
   MAX_ANGLE: 60 / 180 * Math.PI
+  MAGNUS_SCALE: .05
 
   # pos and vel in pixels
   constructor: (@game, init_pos, init_vel) ->
@@ -57,6 +58,18 @@ class CircleBall
       @body.SetLinearVelocity(vel)
 
     @body.SetLinearVelocity(vel)
+
+    # Apply magnus force perpendicular to direction, proportional to spin
+    spin = @body.GetAngularVelocity()
+    magnus_dir = {x: -vel.y, y: vel.x}
+    if spin > 0
+      magnus_dir.x *= -1
+      magnus_dir.y *= -1
+    mag = Math.sqrt(magnus_dir.x * magnus_dir.x + magnus_dir.y * magnus_dir.y)
+    magnus_unit = {x: magnus_dir.x / mag, y: magnus_dir.y / mag}
+    mag = spin * @MAGNUS_SCALE
+    magnus_force = new b2Vec2( magnus_unit.x * mag, magnus_unit.y * mag)
+    @body.ApplyForce(magnus_force, @body.GetPosition())
 
     f = @body.GetFixtureList().GetFilterData()
     c = settings.COLLISION_CATEGORY
