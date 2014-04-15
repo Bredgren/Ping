@@ -524,7 +524,8 @@
     Game.prototype._player2_type = "human";
 
     function Game(stage) {
-      var b2_h, b2_w, b2_x, b2_y, bodyDef, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, style, w, x, y;
+      var ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, style, t, w, x, y,
+        _this = this;
 
       this.stage = stage;
       this.hud_stage = new PIXI.DisplayObjectContainer();
@@ -584,28 +585,136 @@
       this.controls2 = new PIXI.Sprite(g.generateTexture());
       this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6 - this.controls2.width / 2);
       this.controls2.position.y = Math.round(cy * 0.65);
+      rt = new PIXI.RenderTexture(76, 26);
+      c = new PIXI.DisplayObjectContainer();
       g = new PIXI.Graphics();
       g.lineStyle(1, 0xFFFFFF);
       g.drawRect(0, 0, 75, 25);
-      human = g.generateTexture();
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      t = new PIXI.Text("Human", style);
+      t.position.x = 75 / 2 - t.width / 2;
+      t.position.y = 25 / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      human = rt;
+      rt = new PIXI.RenderTexture(76, 26);
+      c = new PIXI.DisplayObjectContainer();
       g = new PIXI.Graphics();
       g.beginFill(0xFFFFFF);
       g.drawRect(0, 0, 75, 25);
       g.endFill();
-      human_selected = g.generateTexture();
-      this.human_box = new PIXI.Sprite(human);
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#000000"
+      };
+      t = new PIXI.Text("Human", style);
+      t.position.x = 75 / 2 - t.width / 2;
+      t.position.y = 25 / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      human_selected = rt;
+      this.human_box = new PIXI.Sprite(human_selected);
       this.human_box.interactive = true;
-      this.human_box.hitArea = new PIXI.Rectangle(10, 25 / 2, 75, 25);
+      this.human_box.hitArea = new PIXI.Rectangle(0, 0, 75, 25);
+      this.human_box.selected = true;
+      this.human_box.setSelected = function(val) {
+        if (val !== this.selected) {
+          if (val) {
+            this.selected = true;
+            return this.setTexture(human_selected);
+          } else {
+            this.selected = false;
+            return this.setTexture(human);
+          }
+        }
+      };
       this.human_box.mouseover = function(data) {
         return this.setTexture(human_selected);
       };
       this.human_box.mouseout = function(data) {
-        return this.setTexture(human);
+        if (!this.selected) {
+          return this.setTexture(human);
+        }
+      };
+      this.human_box.click = function(data) {
+        _this.ai_norm_box.setSelected(false);
+        data.target.setSelected(true);
+        return _this._onSelectHuman();
       };
       x = settings.WIDTH - cx / 3;
       y = cy * 0.7;
       this.human_box.x = Math.round(x - this.human_box.width / 2);
       this.human_box.y = Math.round(y - this.human_box.height / 2);
+      rt = new PIXI.RenderTexture(76, 26);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawRect(0, 0, 75, 25);
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      t = new PIXI.Text("Normal AI", style);
+      t.position.x = 75 / 2 - t.width / 2;
+      t.position.y = 25 / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      ai_norm = rt;
+      rt = new PIXI.RenderTexture(76, 26);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.beginFill(0xFFFFFF);
+      g.drawRect(0, 0, 75, 25);
+      g.endFill();
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#000000"
+      };
+      t = new PIXI.Text("Normal AI", style);
+      t.position.x = 75 / 2 - t.width / 2;
+      t.position.y = 25 / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      ai_norm_selected = rt;
+      this.ai_norm_box = new PIXI.Sprite(ai_norm);
+      this.ai_norm_box.interactive = true;
+      this.ai_norm_box.hitArea = new PIXI.Rectangle(0, 0, 75, 25);
+      this.ai_norm_box.selected = false;
+      this.ai_norm_box.setSelected = function(val) {
+        if (val !== this.selected) {
+          if (val) {
+            this.selected = true;
+            return this.setTexture(ai_norm_selected);
+          } else {
+            this.selected = false;
+            return this.setTexture(ai_norm);
+          }
+        }
+      };
+      this.ai_norm_box.mouseover = function(data) {
+        return this.setTexture(ai_norm_selected);
+      };
+      this.ai_norm_box.mouseout = function(data) {
+        if (!this.selected) {
+          return this.setTexture(ai_norm);
+        }
+      };
+      this.ai_norm_box.click = function(data) {
+        _this.human_box.setSelected(false);
+        data.target.setSelected(true);
+        return _this._onSelectNormAI();
+      };
+      x = settings.WIDTH - cx / 3;
+      y = cy * 0.7 + 25 + 10;
+      this.ai_norm_box.x = Math.round(x - this.ai_norm_box.width / 2);
+      this.ai_norm_box.y = Math.round(y - this.ai_norm_box.height / 2);
       style = {
         font: "15px Arial",
         fill: "#FFFFFF"
@@ -747,7 +856,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, vel, _ref, _ref1;
+      var center, vel, _ref, _ref1, _ref2;
 
       this.state = this.states.GAME;
       this.hud_stage.removeChild(this.begin_text);
@@ -760,6 +869,9 @@
       }
       if (_ref1 = this.human_box, __indexOf.call(this.hud_stage.children, _ref1) >= 0) {
         this.hud_stage.removeChild(this.human_box);
+      }
+      if (_ref2 = this.ai_norm_box, __indexOf.call(this.hud_stage.children, _ref2) >= 0) {
+        this.hud_stage.removeChild(this.ai_norm_box);
       }
       this.left_paddle = new Paddle(this, settings.PADDLE_X);
       this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
@@ -802,8 +914,9 @@
       this.hud_stage.addChild(this.controls1_text);
       if (this._player2_type === "human") {
         this.hud_stage.addChild(this.controls2);
-        this.hud_stage.addChild(this.human_box);
       }
+      this.hud_stage.addChild(this.human_box);
+      this.hud_stage.addChild(this.ai_norm_box);
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.return_text);
       }
@@ -895,6 +1008,21 @@
     Game.prototype.onMouseMove = function(screen_pos) {};
 
     Game.prototype.onMouseWheel = function(delta) {};
+
+    Game.prototype._onSelectHuman = function() {
+      console.log('select human');
+      return this.hud_stage.addChild(this.controls2);
+    };
+
+    Game.prototype._onSelectNormAI = function() {
+      console.log('select normal AI');
+      return this.hud_stage.removeChild(this.controls2);
+    };
+
+    Game.prototype._onSelectHardAI = function() {
+      console.log('select hard AI');
+      return this.hud_stage.removeChild(this.controls2);
+    };
 
     Game.prototype._checkContacts = function() {
       var ball, bodyA, bodyB, contact, vel, _results;

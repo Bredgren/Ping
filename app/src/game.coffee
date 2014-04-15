@@ -89,47 +89,121 @@ class Game
       Math.round(settings.WIDTH - cx * 0.6 - @controls2.width / 2)
     @controls2.position.y = Math.round(cy * 0.65)
 
+    rt = new PIXI.RenderTexture(76, 26)
+    c = new PIXI.DisplayObjectContainer()
+
     g = new PIXI.Graphics()
     g.lineStyle(1, 0xFFFFFF)
     g.drawRect(0, 0, 75, 25)
-    human = g.generateTexture()
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    t = new PIXI.Text("Human", style)
+    t.position.x = 75 / 2 - t.width / 2
+    t.position.y = 25 / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    human = rt
+
+    rt = new PIXI.RenderTexture(76, 26)
+    c = new PIXI.DisplayObjectContainer()
+
     g = new PIXI.Graphics()
     g.beginFill(0xFFFFFF)
     g.drawRect(0, 0, 75, 25)
     g.endFill()
-    human_selected = g.generateTexture()
-    @human_box = new PIXI.Sprite(human)
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#000000"}
+    t = new PIXI.Text("Human", style)
+    t.position.x = 75 / 2 - t.width / 2
+    t.position.y = 25 / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    human_selected = rt
+
+    @human_box = new PIXI.Sprite(human_selected)
     @human_box.interactive = true
-    @human_box.hitArea = new PIXI.Rectangle(10, 25/2, 75, 25)
+    @human_box.hitArea = new PIXI.Rectangle(0, 0, 75, 25)
+    @human_box.selected = true
+    @human_box.setSelected = (val) ->
+      if val isnt @selected
+        if val
+          @selected = true
+          @setTexture(human_selected)
+        else
+          @selected = false
+          @setTexture(human)
     @human_box.mouseover = (data) ->
       @setTexture(human_selected)
     @human_box.mouseout = (data) ->
-      @setTexture(human)
-    # style = {font: "15px Arial", fill: "#000000"}
-    # @human_selected_text = new PIXI.Text("Human", style)
+      if not @selected
+        @setTexture(human)
+    @human_box.click = (data) =>
+      @ai_norm_box.setSelected(false)
+      # @ai_hard_box.setSelected(false)
+      data.target.setSelected(true)
+      @_onSelectHuman()
     x = settings.WIDTH - cx / 3
     y = cy * 0.7
-    # @human_selected_box.x = Math.round(x - @human_selected_box.width / 2)
-    # @human_selected_box.y = Math.round(y - @human_selected_box.height / 2)
-    # @human_selected_text.x = Math.round(x - @human_selected_text.width / 2)
-    # @human_selected_text.y = Math.round(y - @human_selected_text.height / 2)
     @human_box.x = Math.round(x - @human_box.width / 2)
     @human_box.y = Math.round(y - @human_box.height / 2)
 
-    # g = new PIXI.Graphics()
-    # g.lineStyle(1, 0xFFFFFF)
-    # g.drawRect(0, 0, 75, 25)
-    # @ai_norm_select_box = new PIXI.Sprite(g.generateTexture())
-    # style = {font: "15px Arial", fill: "#FFFFFF"}
-    # @ai_norm_select_text = new PIXI.Text("Normal AI", style)
-    # x = settings.WIDTH - cx / 3
-    # y = cy * 0.8
-    # @ai_norm_select_box.x = Math.round(x - @ai_normal_selected_box.width / 2)
-    # @ai_norm_select_box.y = Math.round(y - @ai_normal_selected_box.height / 2)
-    # @ai_normal_select_text.x =
-    #   Math.round(x - @ai_normal_selected_text.width / 2)
-    # @ai_normal_select_text.y =
-    #   Math.round(y - @ai_normal_selected_text.height / 2)
+    rt = new PIXI.RenderTexture(76, 26)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.drawRect(0, 0, 75, 25)
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    t = new PIXI.Text("Normal AI", style)
+    t.position.x = 75 / 2 - t.width / 2
+    t.position.y = 25 / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    ai_norm = rt
+
+    rt = new PIXI.RenderTexture(76, 26)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.beginFill(0xFFFFFF)
+    g.drawRect(0, 0, 75, 25)
+    g.endFill()
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#000000"}
+    t = new PIXI.Text("Normal AI", style)
+    t.position.x = 75 / 2 - t.width / 2
+    t.position.y = 25 / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    ai_norm_selected = rt
+
+    @ai_norm_box = new PIXI.Sprite(ai_norm)
+    @ai_norm_box.interactive = true
+    @ai_norm_box.hitArea = new PIXI.Rectangle(0, 0, 75, 25)
+    @ai_norm_box.selected = false
+    @ai_norm_box.setSelected = (val) ->
+      if val isnt @selected
+        if val
+          @selected = true
+          @setTexture(ai_norm_selected)
+        else
+          @selected = false
+          @setTexture(ai_norm)
+    @ai_norm_box.mouseover = (data) ->
+      @setTexture(ai_norm_selected)
+    @ai_norm_box.mouseout = (data) ->
+      if not @selected
+        @setTexture(ai_norm)
+    @ai_norm_box.click = (data) =>
+      @human_box.setSelected(false)
+      # @ai_hard_box.setSelected(false)
+      data.target.setSelected(true)
+      @_onSelectNormAI()
+    x = settings.WIDTH - cx / 3
+    y = cy * 0.7 + 25 + 10
+    @ai_norm_box.x = Math.round(x - @ai_norm_box.width / 2)
+    @ai_norm_box.y = Math.round(y - @ai_norm_box.height / 2)
 
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
@@ -277,10 +351,8 @@ class Game
       @hud_stage.removeChild(@controls2)
     if @human_box in @hud_stage.children
       @hud_stage.removeChild(@human_box)
-    # if @human_selected_text in @hud_stage.children
-    #   @hud_stage.removeChild(@human_selected_text)
-    # if @ai_norm_select_text in @hud_stage.children
-    #   @hud_stage.removeChild(@ai_norm_select_text)
+    if @ai_norm_box in @hud_stage.children
+      @hud_stage.removeChild(@ai_norm_box)
 
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
@@ -316,8 +388,8 @@ class Game
     @hud_stage.addChild(@controls1_text)
     if @_player2_type is "human"
       @hud_stage.addChild(@controls2)
-      @hud_stage.addChild(@human_box)
-      # @hud_stage.addChild(@human_selected_text)
+    @hud_stage.addChild(@human_box)
+    @hud_stage.addChild(@ai_norm_box)
 
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)
@@ -386,6 +458,18 @@ class Game
   onMouseMove: (screen_pos) ->
 
   onMouseWheel: (delta) ->
+
+  _onSelectHuman: () ->
+    console.log('select human')
+    @hud_stage.addChild(@controls2)
+
+  _onSelectNormAI: () ->
+    console.log('select normal AI')
+    @hud_stage.removeChild(@controls2)
+
+  _onSelectHardAI: () ->
+    console.log('select hard AI')
+    @hud_stage.removeChild(@controls2)
 
   _checkContacts: () ->
     contact = @world.GetContactList()
