@@ -265,9 +265,12 @@ class Game
 
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
+    @quit_text = new PIXI.Text("Press ESC to quit", style)
     @return_text = new PIXI.Text("Press SPACE to return to menu", style)
     @begin_text.position.x = Math.round(cx - @begin_text.width / 2)
     @begin_text.position.y = Math.round(cy - @begin_text.height / 2)
+    @quit_text.position.x = 0
+    @quit_text.position.y = 0
     @return_text.position.x = Math.round(cx - @return_text.width / 2)
     @return_text.position.y = Math.round(cy - @return_text.height / 2)
 
@@ -369,6 +372,7 @@ class Game
       @time_text.x = settings.WIDTH / 2 - @time_text.width / 2
       if @time <= 0
         @endGame()
+        return
 
       @left_paddle.update()
       @right_paddle.update()
@@ -414,6 +418,8 @@ class Game
     if @ai_hard_box in @hud_stage.children
       @hud_stage.removeChild(@ai_hard_box)
 
+    @hud_stage.addChild(@quit_text)
+
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
     center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
@@ -434,6 +440,7 @@ class Game
 
   endGame: () ->
     @state = @states.END
+    @hud_stage.removeChild(@quit_text)
     @hud_stage.addChild(@return_text)
     @left_paddle.destroy()
     @right_paddle.destroy()
@@ -488,8 +495,9 @@ class Game
           @startGame()
         when @states.END
           @gotoMenu()
-        when @states.GAME
-          @endGame()
+
+    if key_code is bindings.END and @state is @states.GAME
+      @endGame()
 
   onKeyUp: (key_code) ->
     if @state isnt @states.GAME then return

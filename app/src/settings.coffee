@@ -23,6 +23,7 @@ settings = {
     P2_LEFT:  37
     P2_RIGHT: 39
     START:    32
+    END:      27
 
   COLLISION_CATEGORY:
     PADDLE_L: 0x0001

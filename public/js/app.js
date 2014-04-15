@@ -142,7 +142,8 @@
       P2_DOWN: 40,
       P2_LEFT: 37,
       P2_RIGHT: 39,
-      START: 32
+      START: 32,
+      END: 27
     },
     COLLISION_CATEGORY: {
       PADDLE_L: 0x0001,
@@ -513,7 +514,7 @@
 
     Game.prototype.time = 0;
 
-    Game.prototype.time_limit = 60 * 2;
+    Game.prototype.time_limit = 160 * 2;
 
     Game.prototype.left_score = 0;
 
@@ -788,9 +789,12 @@
         fill: "#FFFFFF"
       };
       this.begin_text = new PIXI.Text("Press SPACE to begin", style);
+      this.quit_text = new PIXI.Text("Press ESC to quit", style);
       this.return_text = new PIXI.Text("Press SPACE to return to menu", style);
       this.begin_text.position.x = Math.round(cx - this.begin_text.width / 2);
       this.begin_text.position.y = Math.round(cy - this.begin_text.height / 2);
+      this.quit_text.position.x = 0;
+      this.quit_text.position.y = 0;
       this.return_text.position.x = Math.round(cx - this.return_text.width / 2);
       this.return_text.position.y = Math.round(cy - this.return_text.height / 2);
       style = {
@@ -888,6 +892,7 @@
         this.time_text.x = settings.WIDTH / 2 - this.time_text.width / 2;
         if (this.time <= 0) {
           this.endGame();
+          return;
         }
         this.left_paddle.update();
         this.right_paddle.update();
@@ -944,6 +949,7 @@
       if (_ref3 = this.ai_hard_box, __indexOf.call(this.hud_stage.children, _ref3) >= 0) {
         this.hud_stage.removeChild(this.ai_hard_box);
       }
+      this.hud_stage.addChild(this.quit_text);
       this.left_paddle = new Paddle(this, settings.PADDLE_X);
       this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
       center = {
@@ -968,6 +974,7 @@
 
     Game.prototype.endGame = function() {
       this.state = this.states.END;
+      this.hud_stage.removeChild(this.quit_text);
       this.hud_stage.addChild(this.return_text);
       this.left_paddle.destroy();
       this.right_paddle.destroy();
@@ -1037,12 +1044,14 @@
       if (key_code === bindings.START) {
         switch (this.state) {
           case this.states.MENU:
-            return this.startGame();
+            this.startGame();
+            break;
           case this.states.END:
-            return this.gotoMenu();
-          case this.states.GAME:
-            return this.endGame();
+            this.gotoMenu();
         }
+      }
+      if (key_code === bindings.END && this.state === this.states.GAME) {
+        return this.endGame();
       }
     };
 
