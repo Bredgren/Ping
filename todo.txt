@@ -1,7 +1,5 @@
 (lower volume)
 
-- display end game items
-    - victor
 - count down at start
 - visual feedback for
     - scoring
@@ -18,6 +16,9 @@
 - menu for choosing
 - add AI
 - save stats
+    - wins/losses/ties
+    - total points scored against each AI
+    - highest score in a single match for each AI
 - display stats
 - add ability to unlock balls
 - prevent ball from getting stuck behind paddles (contact listener?)

@@ -7,8 +7,9 @@
 class Game
   states:
     MENU: 0
-    GAME: 1
-    END: 2
+    COUNT_DOWN: 1
+    GAME: 2
+    END: 3
 
   state: null
 
@@ -21,6 +22,7 @@ class Game
   right_score: 0
 
   _loop_time: 0
+  _count_down: 3
 
   _player2_type: "human"
 
@@ -47,6 +49,10 @@ class Game
     @victor_text = new PIXI.Text("Player 1 Wins!", style)
     @victor_text.position.x = cx - @victor_text.width / 2
     @victor_text.position.y = cy / 3
+
+    @countdown_text = new PIXI.Text("3", style)
+    @countdown_text.position.x = cx - @countdown_text.width / 2
+    @countdown_text.position.y = cy / 3
 
     style = {font: "20px Arial", fill: "#FFFFFF"}
     @player1_text = new PIXI.Text("Player 1", style)
@@ -280,8 +286,8 @@ class Game
     @return_text.position.y = Math.round(cy - @return_text.height / 2)
 
     style = {font: "25px Arial", fill: "#FFFFFF"}
-    @time_text = new PIXI.Text("", style)
-    @time_text.position.x = settings.WIDTH / 2
+    @time_text = new PIXI.Text("000", style)
+    @time_text.position.x = settings.WIDTH / 2 - @time_text.width / 2
     @time_text.position.y = 10
     style = {font: "30px Arial", fill: "#FFFFFF"}
     @left_score_text = new PIXI.Text("", style)
@@ -371,10 +377,20 @@ class Game
     dt = t - @_loop_time
     @_loop_time = t
 
-    if @state is @states.GAME
+    if @state is @states.COUNT_DOWN
+      @_count_down -= dt / 1000
+      if @_count_down <= 0
+        @state = @states.GAME
+        @hud_stage.removeChild(@countdown_text)
+      @countdown_text.setText("" + Math.round(@_count_down))
+    else if @state is @states.GAME
       @time -= dt / 1000
-      @time_text.setText("" + Math.round(@time))
-      @time_text.x = settings.WIDTH / 2 - @time_text.width / 2
+      t = "" + Math.round(@time)
+      if t.length is 1
+        t = "00#{t}"
+      else if t.length is 2
+        t = "0#{t}"
+      @time_text.setText(t)
       if @time <= 0
         @endGame()
         return
@@ -392,7 +408,7 @@ class Game
     @hud_graphics.clear()
 
   draw: () ->
-    if @state is @states.GAME
+    if @state is @states.GAME or @state is @states.COUNT_DOWN
       @left_paddle.draw()
       @right_paddle.draw()
       @ball.draw()
@@ -408,7 +424,8 @@ class Game
     @left_score_text.setText("" + @left_score)
 
   startGame: () ->
-    @state = @states.GAME
+    @state = @states.COUNT_DOWN
+    @_count_down = 3
     @hud_stage.removeChild(@begin_text)
     @hud_stage.removeChild(@title_text)
     @hud_stage.removeChild(@player1_text)
@@ -424,6 +441,7 @@ class Game
       @hud_stage.removeChild(@ai_hard_box)
 
     @hud_stage.addChild(@quit_text)
+    @hud_stage.addChild(@countdown_text)
 
     @left_paddle = new Paddle(@, settings.PADDLE_X)
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
@@ -435,7 +453,12 @@ class Game
     @left_score = 0
     @right_score = 0
 
-    @time_text.setText("" + @time)
+    t = "" + Math.round(@time)
+    if t.length is 1
+      t = "00#{t}"
+    else if t.length is 2
+      t = "0#{t}"
+    @time_text.setText(t)
     @left_score_text.setText("" + @left_score)
     @right_score_text.setText("" + @right_score)
 

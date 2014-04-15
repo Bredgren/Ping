@@ -500,8 +500,9 @@
   Game = (function() {
     Game.prototype.states = {
       MENU: 0,
-      GAME: 1,
-      END: 2
+      COUNT_DOWN: 1,
+      GAME: 2,
+      END: 3
     };
 
     Game.prototype.state = null;
@@ -521,6 +522,8 @@
     Game.prototype.right_score = 0;
 
     Game.prototype._loop_time = 0;
+
+    Game.prototype._count_down = 3;
 
     Game.prototype._player2_type = "human";
 
@@ -553,6 +556,9 @@
       this.victor_text = new PIXI.Text("Player 1 Wins!", style);
       this.victor_text.position.x = cx - this.victor_text.width / 2;
       this.victor_text.position.y = cy / 3;
+      this.countdown_text = new PIXI.Text("3", style);
+      this.countdown_text.position.x = cx - this.countdown_text.width / 2;
+      this.countdown_text.position.y = cy / 3;
       style = {
         font: "20px Arial",
         fill: "#FFFFFF"
@@ -808,8 +814,8 @@
         font: "25px Arial",
         fill: "#FFFFFF"
       };
-      this.time_text = new PIXI.Text("", style);
-      this.time_text.position.x = settings.WIDTH / 2;
+      this.time_text = new PIXI.Text("000", style);
+      this.time_text.position.x = settings.WIDTH / 2 - this.time_text.width / 2;
       this.time_text.position.y = 10;
       style = {
         font: "30px Arial",
@@ -893,10 +899,22 @@
       t = (new Date()).getTime();
       dt = t - this._loop_time;
       this._loop_time = t;
-      if (this.state === this.states.GAME) {
+      if (this.state === this.states.COUNT_DOWN) {
+        this._count_down -= dt / 1000;
+        if (this._count_down <= 0) {
+          this.state = this.states.GAME;
+          this.hud_stage.removeChild(this.countdown_text);
+        }
+        return this.countdown_text.setText("" + Math.round(this._count_down));
+      } else if (this.state === this.states.GAME) {
         this.time -= dt / 1000;
-        this.time_text.setText("" + Math.round(this.time));
-        this.time_text.x = settings.WIDTH / 2 - this.time_text.width / 2;
+        t = "" + Math.round(this.time);
+        if (t.length === 1) {
+          t = "00" + t;
+        } else if (t.length === 2) {
+          t = "0" + t;
+        }
+        this.time_text.setText(t);
         if (this.time <= 0) {
           this.endGame();
           return;
@@ -915,7 +933,7 @@
     };
 
     Game.prototype.draw = function() {
-      if (this.state === this.states.GAME) {
+      if (this.state === this.states.GAME || this.state === this.states.COUNT_DOWN) {
         this.left_paddle.draw();
         this.right_paddle.draw();
         this.ball.draw();
@@ -936,9 +954,10 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, vel, _ref, _ref1, _ref2, _ref3;
+      var center, t, vel, _ref, _ref1, _ref2, _ref3;
 
-      this.state = this.states.GAME;
+      this.state = this.states.COUNT_DOWN;
+      this._count_down = 3;
       this.hud_stage.removeChild(this.begin_text);
       this.hud_stage.removeChild(this.title_text);
       this.hud_stage.removeChild(this.player1_text);
@@ -957,6 +976,7 @@
         this.hud_stage.removeChild(this.ai_hard_box);
       }
       this.hud_stage.addChild(this.quit_text);
+      this.hud_stage.addChild(this.countdown_text);
       this.left_paddle = new Paddle(this, settings.PADDLE_X);
       this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
       center = {
@@ -971,7 +991,13 @@
       this.time = this.time_limit;
       this.left_score = 0;
       this.right_score = 0;
-      this.time_text.setText("" + this.time);
+      t = "" + Math.round(this.time);
+      if (t.length === 1) {
+        t = "00" + t;
+      } else if (t.length === 2) {
+        t = "0" + t;
+      }
+      this.time_text.setText(t);
       this.left_score_text.setText("" + this.left_score);
       this.right_score_text.setText("" + this.right_score);
       this.hud_stage.addChild(this.time_text);
