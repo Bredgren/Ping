@@ -1,15 +1,26 @@
 (lower volume)
 
-- display menu items
 - display end game items
+    - victor
+- count down at start
+- visual feedback for
+    - scoring
+    - time limit
+- auditory feedback for
+    - scoring
+    - time limit (initial count down, last seconds, and end)
+    - paddle contact with ball
 
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
 
 - add more balls
+- menu for choosing
 - add AI
 - save stats
+- display stats
 - add ability to unlock balls
 - prevent ball from getting stuck behind paddles (contact listener?)
+- sudden death on tie?
 
 - fine-tune controls again

@@ -16,7 +16,7 @@ class Game
   right_paddle: null
   ball: null
   time: 0
-  time_limit: 60 * 2
+  time_limit: 10 #60 * 2
   left_score: 0
   right_score: 0
 
@@ -42,6 +42,11 @@ class Game
     @title_text = new PIXI.Text("Ping", style)
     @title_text.position.x = cx - @title_text.width / 2
     @title_text.position.y = cy / 3
+
+    style = {font: "50px Arial", fill: "#FFFFFF"}
+    @victor_text = new PIXI.Text("Player 1 Wins!", style)
+    @victor_text.position.x = cx - @victor_text.width / 2
+    @victor_text.position.y = cy / 3
 
     style = {font: "20px Arial", fill: "#FFFFFF"}
     @player1_text = new PIXI.Text("Player 1", style)
@@ -442,6 +447,13 @@ class Game
     @state = @states.END
     @hud_stage.removeChild(@quit_text)
     @hud_stage.addChild(@return_text)
+    if @left_score > @right_score
+      @victor_text.setText("Player 1 Wins!")
+    else if @left_score < @right_score
+      @victor_text.setText("Player 2 Wins!")
+    else
+      @victor_text.setText("Player 3 Wins?!")
+    @hud_stage.addChild(@victor_text)
     @left_paddle.destroy()
     @right_paddle.destroy()
     @ball.destroy()
@@ -467,6 +479,8 @@ class Game
       @hud_stage.removeChild(@left_score_text)
     if @right_score_text in @hud_stage.children
       @hud_stage.removeChild(@right_score_text)
+    if @victor_text in @hud_stage.children
+      @hud_stage.removeChild(@victor_text)
 
   onKeyDown: (key_code) ->
     bindings = settings.BINDINGS

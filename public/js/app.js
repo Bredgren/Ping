@@ -514,7 +514,7 @@
 
     Game.prototype.time = 0;
 
-    Game.prototype.time_limit = 160 * 2;
+    Game.prototype.time_limit = 10;
 
     Game.prototype.left_score = 0;
 
@@ -546,6 +546,13 @@
       this.title_text = new PIXI.Text("Ping", style);
       this.title_text.position.x = cx - this.title_text.width / 2;
       this.title_text.position.y = cy / 3;
+      style = {
+        font: "50px Arial",
+        fill: "#FFFFFF"
+      };
+      this.victor_text = new PIXI.Text("Player 1 Wins!", style);
+      this.victor_text.position.x = cx - this.victor_text.width / 2;
+      this.victor_text.position.y = cy / 3;
       style = {
         font: "20px Arial",
         fill: "#FFFFFF"
@@ -976,13 +983,21 @@
       this.state = this.states.END;
       this.hud_stage.removeChild(this.quit_text);
       this.hud_stage.addChild(this.return_text);
+      if (this.left_score > this.right_score) {
+        this.victor_text.setText("Player 1 Wins!");
+      } else if (this.left_score < this.right_score) {
+        this.victor_text.setText("Player 2 Wins!");
+      } else {
+        this.victor_text.setText("Player 3 Wins?!");
+      }
+      this.hud_stage.addChild(this.victor_text);
       this.left_paddle.destroy();
       this.right_paddle.destroy();
       return this.ball.destroy();
     };
 
     Game.prototype.gotoMenu = function() {
-      var _ref, _ref1, _ref2, _ref3;
+      var _ref, _ref1, _ref2, _ref3, _ref4;
 
       this.state = this.states.MENU;
       this.hud_stage.addChild(this.begin_text);
@@ -1006,7 +1021,10 @@
         this.hud_stage.removeChild(this.left_score_text);
       }
       if (_ref3 = this.right_score_text, __indexOf.call(this.hud_stage.children, _ref3) >= 0) {
-        return this.hud_stage.removeChild(this.right_score_text);
+        this.hud_stage.removeChild(this.right_score_text);
+      }
+      if (_ref4 = this.victor_text, __indexOf.call(this.hud_stage.children, _ref4) >= 0) {
+        return this.hud_stage.removeChild(this.victor_text);
       }
     };
 
