@@ -1,6 +1,5 @@
 (lower volume)
 
-- count down at start
 - visual feedback for
     - scoring
     - time limit
@@ -8,13 +7,26 @@
     - scoring
     - time limit (initial count down, last seconds, and end)
     - paddle contact with ball
+- simple AI
+- better control images
 
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
+    - parameters:
+        - screen size
+        - paddle 
+            - size
+            - location
+            - acceleration/deceleration
+            - max speed
+        - ball
+            - min speed
+            - max angle
+            - initial speed/direction
+            - magnus force
 
-- add more balls
-- menu for choosing
-- add AI
+- add more balls and menu for choosing
+- improve AI
 - save stats
     - wins/losses/ties
     - total points scored against each AI
@@ -22,6 +34,7 @@
 - display stats
 - add ability to unlock balls
 - prevent ball from getting stuck behind paddles (contact listener?)
+    - and/or only register points after contact with opposite wall/paddle
 - sudden death on tie?
 
 - fine-tune controls again

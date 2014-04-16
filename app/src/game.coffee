@@ -17,7 +17,7 @@ class Game
   right_paddle: null
   ball: null
   time: 0
-  time_limit: 10 #60 * 2
+  time_limit: 60 * 2
   left_score: 0
   right_score: 0
 
@@ -25,6 +25,8 @@ class Game
   _count_down: 3
 
   _player2_type: "human"
+
+  GRAD_TIME: 20
 
   constructor: (@stage) ->
     @hud_stage = new PIXI.DisplayObjectContainer()
@@ -297,6 +299,16 @@ class Game
     @right_score_text.position.x = 3 * settings.WIDTH / 4
     @right_score_text.position.y = 10
 
+    g = new PIXI.Graphics()
+    count = 20
+    for x in [0...count]
+      g.lineStyle(1, 0xFFFFFF, 1 - (x / count))
+      g.moveTo(x, 0)
+      g.lineTo(x, settings.HEIGHT)
+    @score_grad = new PIXI.Sprite(g.generateTexture())
+    @score_grad.anchor.x = 11 / @score_grad.width
+    @score_grad.anchor.y = 11 / @score_grad.height
+
     @world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep=false)
     if settings.DEBUG_DRAW
       debug_drawer = new DebugDraw()
@@ -404,6 +416,12 @@ class Game
 
       @_checkContacts()
 
+    if @_score_counter > 0
+      @_score_counter--
+      @score_grad.alpha = @_score_counter / @GRAD_TIME
+      if @_score_counter <= 0
+        @hud_stage.removeChild(@score_grad)
+
   clear: () ->
     @hud_graphics.clear()
 
@@ -419,9 +437,19 @@ class Game
     @right_score++
     @right_score_text.setText("" + @right_score)
 
+    @score_grad.scale.x = 1
+    @score_grad.position.x = 0
+    @hud_stage.addChild(@score_grad)
+    @_score_counter = @GRAD_TIME
+
   scoreLeft: () ->
     @left_score++
     @left_score_text.setText("" + @left_score)
+
+    @score_grad.scale.x = -1
+    @score_grad.position.x = settings.WIDTH
+    @hud_stage.addChild(@score_grad)
+    @_score_counter = @GRAD_TIME
 
   startGame: () ->
     @state = @states.COUNT_DOWN

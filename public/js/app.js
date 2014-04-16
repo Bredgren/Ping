@@ -515,7 +515,7 @@
 
     Game.prototype.time = 0;
 
-    Game.prototype.time_limit = 10;
+    Game.prototype.time_limit = 60 * 2;
 
     Game.prototype.left_score = 0;
 
@@ -527,8 +527,10 @@
 
     Game.prototype._player2_type = "human";
 
+    Game.prototype.GRAD_TIME = 20;
+
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, style, t, w, x, y,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, style, t, w, x, y, _i,
         _this = this;
 
       this.stage = stage;
@@ -827,6 +829,16 @@
       this.right_score_text = new PIXI.Text("", style);
       this.right_score_text.position.x = 3 * settings.WIDTH / 4;
       this.right_score_text.position.y = 10;
+      g = new PIXI.Graphics();
+      count = 20;
+      for (x = _i = 0; 0 <= count ? _i < count : _i > count; x = 0 <= count ? ++_i : --_i) {
+        g.lineStyle(1, 0xFFFFFF, 1 - (x / count));
+        g.moveTo(x, 0);
+        g.lineTo(x, settings.HEIGHT);
+      }
+      this.score_grad = new PIXI.Sprite(g.generateTexture());
+      this.score_grad.anchor.x = 11 / this.score_grad.width;
+      this.score_grad.anchor.y = 11 / this.score_grad.height;
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
         debug_drawer = new DebugDraw();
@@ -905,7 +917,7 @@
           this.state = this.states.GAME;
           this.hud_stage.removeChild(this.countdown_text);
         }
-        return this.countdown_text.setText("" + Math.round(this._count_down));
+        this.countdown_text.setText("" + Math.round(this._count_down));
       } else if (this.state === this.states.GAME) {
         this.time -= dt / 1000;
         t = "" + Math.round(this.time);
@@ -924,7 +936,14 @@
         this.ball.update();
         this.world.Step(settings.BOX2D_TIME_STEP, settings.BOX2D_VI, settings.BOX2D_PI);
         this.world.ClearForces();
-        return this._checkContacts();
+        this._checkContacts();
+      }
+      if (this._score_counter > 0) {
+        this._score_counter--;
+        this.score_grad.alpha = this._score_counter / this.GRAD_TIME;
+        if (this._score_counter <= 0) {
+          return this.hud_stage.removeChild(this.score_grad);
+        }
       }
     };
 
@@ -945,12 +964,20 @@
 
     Game.prototype.scoreRight = function() {
       this.right_score++;
-      return this.right_score_text.setText("" + this.right_score);
+      this.right_score_text.setText("" + this.right_score);
+      this.score_grad.scale.x = 1;
+      this.score_grad.position.x = 0;
+      this.hud_stage.addChild(this.score_grad);
+      return this._score_counter = this.GRAD_TIME;
     };
 
     Game.prototype.scoreLeft = function() {
       this.left_score++;
-      return this.left_score_text.setText("" + this.left_score);
+      this.left_score_text.setText("" + this.left_score);
+      this.score_grad.scale.x = -1;
+      this.score_grad.position.x = settings.WIDTH;
+      this.hud_stage.addChild(this.score_grad);
+      return this._score_counter = this.GRAD_TIME;
     };
 
     Game.prototype.startGame = function() {
