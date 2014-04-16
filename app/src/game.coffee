@@ -27,6 +27,7 @@ class Game
   _player2_type: "human"
 
   GRAD_TIME: 20
+  TIME_TEXT_SIZE: 50
 
   constructor: (@stage) ->
     @hud_stage = new PIXI.DisplayObjectContainer()
@@ -278,19 +279,25 @@ class Game
 
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
-    @quit_text = new PIXI.Text("Press ESC to quit", style)
     @return_text = new PIXI.Text("Press SPACE to return to menu", style)
     @begin_text.position.x = Math.round(cx - @begin_text.width / 2)
     @begin_text.position.y = Math.round(cy - @begin_text.height / 2)
-    @quit_text.position.x = 0
-    @quit_text.position.y = 0
     @return_text.position.x = Math.round(cx - @return_text.width / 2)
     @return_text.position.y = Math.round(cy - @return_text.height / 2)
 
-    style = {font: "25px Arial", fill: "#FFFFFF"}
+    style = {font: "10px Arial", fill: "#FFFFFF"}
+    @quit_text = new PIXI.Text("Press ESC to quit", style)
+    @quit_text.position.x = Math.round(settings.WIDTH / 2 - @quit_text.width /2)
+    @quit_text.position.y = 0
+
+    style = {font: "#{@TIME_TEXT_SIZE}px Arial", fill: "#FFFFFF"}
     @time_text = new PIXI.Text("000", style)
-    @time_text.position.x = settings.WIDTH / 2 - @time_text.width / 2
-    @time_text.position.y = 10
+    @time_text.anchor.x = 0.5
+    @time_text.anchor.y = 0.5
+    @time_text.position.x = settings.WIDTH / 2
+    @time_text.position.y = 10 + @time_text.height / 2
+    @time_text.scale.x = 0.5
+    @time_text.scale.y = 0.5
     style = {font: "30px Arial", fill: "#FFFFFF"}
     @left_score_text = new PIXI.Text("", style)
     @left_score_text.position.x = settings.WIDTH / 4
@@ -344,7 +351,6 @@ class Game
     f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
     fix.SetFilterData(f)
 
-
     bodyDef.position.x = b2_x
     bodyDef.position.y = settings.HEIGHT / settings.PPM + offset  #
     fixDef.shape = new b2Shapes.b2PolygonShape()
@@ -354,7 +360,6 @@ class Game
     f = fix.GetFilterData()
     f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
     fix.SetFilterData(f)
-
 
     b2_w = b2_h
     b2_h = settings.HEIGHT / settings.PPM  #
@@ -397,12 +402,18 @@ class Game
       @countdown_text.setText("" + Math.round(@_count_down))
     else if @state is @states.GAME
       @time -= dt / 1000
-      t = "" + Math.round(@time)
+      time = Math.ceil(@time)
+      t = "" + time
       if t.length is 1
         t = "00#{t}"
       else if t.length is 2
         t = "0#{t}"
       @time_text.setText(t)
+      if @time <= 10
+        decimal = @time - Math.floor(@time)
+        @time_text.scale.x = decimal + 0.4
+        @time_text.scale.y = decimal + 0.4
+
       if @time <= 0
         @endGame()
         return
@@ -481,12 +492,18 @@ class Game
     @left_score = 0
     @right_score = 0
 
-    t = "" + Math.round(@time)
+    t = "" + Math.ceil(@time)
     if t.length is 1
       t = "00#{t}"
     else if t.length is 2
       t = "0#{t}"
     @time_text.setText(t)
+    style = {font: "#{@TIME_TEXT_SIZE}px Arial", fill: "#FFFFFF"}
+    @time_text.setStyle(style)
+    @time_text.position.x = settings.WIDTH / 2
+    @time_text.scale.x = 0.5
+    @time_text.scale.y = 0.5
+
     @left_score_text.setText("" + @left_score)
     @right_score_text.setText("" + @right_score)
 

@@ -1,7 +1,6 @@
 (lower volume)
 
 - visual feedback for
-    - scoring
     - time limit
 - auditory feedback for
     - scoring

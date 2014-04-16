@@ -529,6 +529,8 @@
 
     Game.prototype.GRAD_TIME = 20;
 
+    Game.prototype.TIME_TEXT_SIZE = 50;
+
     function Game(stage) {
       var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, style, t, w, x, y, _i,
         _this = this;
@@ -804,21 +806,29 @@
         fill: "#FFFFFF"
       };
       this.begin_text = new PIXI.Text("Press SPACE to begin", style);
-      this.quit_text = new PIXI.Text("Press ESC to quit", style);
       this.return_text = new PIXI.Text("Press SPACE to return to menu", style);
       this.begin_text.position.x = Math.round(cx - this.begin_text.width / 2);
       this.begin_text.position.y = Math.round(cy - this.begin_text.height / 2);
-      this.quit_text.position.x = 0;
-      this.quit_text.position.y = 0;
       this.return_text.position.x = Math.round(cx - this.return_text.width / 2);
       this.return_text.position.y = Math.round(cy - this.return_text.height / 2);
       style = {
-        font: "25px Arial",
+        font: "10px Arial",
+        fill: "#FFFFFF"
+      };
+      this.quit_text = new PIXI.Text("Press ESC to quit", style);
+      this.quit_text.position.x = Math.round(settings.WIDTH / 2 - this.quit_text.width / 2);
+      this.quit_text.position.y = 0;
+      style = {
+        font: "" + this.TIME_TEXT_SIZE + "px Arial",
         fill: "#FFFFFF"
       };
       this.time_text = new PIXI.Text("000", style);
-      this.time_text.position.x = settings.WIDTH / 2 - this.time_text.width / 2;
-      this.time_text.position.y = 10;
+      this.time_text.anchor.x = 0.5;
+      this.time_text.anchor.y = 0.5;
+      this.time_text.position.x = settings.WIDTH / 2;
+      this.time_text.position.y = 10 + this.time_text.height / 2;
+      this.time_text.scale.x = 0.5;
+      this.time_text.scale.y = 0.5;
       style = {
         font: "30px Arial",
         fill: "#FFFFFF"
@@ -906,7 +916,7 @@
     }
 
     Game.prototype.update = function() {
-      var dt, t;
+      var decimal, dt, t, time;
 
       t = (new Date()).getTime();
       dt = t - this._loop_time;
@@ -920,13 +930,19 @@
         this.countdown_text.setText("" + Math.round(this._count_down));
       } else if (this.state === this.states.GAME) {
         this.time -= dt / 1000;
-        t = "" + Math.round(this.time);
+        time = Math.ceil(this.time);
+        t = "" + time;
         if (t.length === 1) {
           t = "00" + t;
         } else if (t.length === 2) {
           t = "0" + t;
         }
         this.time_text.setText(t);
+        if (this.time <= 10) {
+          decimal = this.time - Math.floor(this.time);
+          this.time_text.scale.x = decimal + 0.4;
+          this.time_text.scale.y = decimal + 0.4;
+        }
         if (this.time <= 0) {
           this.endGame();
           return;
@@ -981,7 +997,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, t, vel, _ref, _ref1, _ref2, _ref3;
+      var center, style, t, vel, _ref, _ref1, _ref2, _ref3;
 
       this.state = this.states.COUNT_DOWN;
       this._count_down = 3;
@@ -1018,13 +1034,21 @@
       this.time = this.time_limit;
       this.left_score = 0;
       this.right_score = 0;
-      t = "" + Math.round(this.time);
+      t = "" + Math.ceil(this.time);
       if (t.length === 1) {
         t = "00" + t;
       } else if (t.length === 2) {
         t = "0" + t;
       }
       this.time_text.setText(t);
+      style = {
+        font: "" + this.TIME_TEXT_SIZE + "px Arial",
+        fill: "#FFFFFF"
+      };
+      this.time_text.setStyle(style);
+      this.time_text.position.x = settings.WIDTH / 2;
+      this.time_text.scale.x = 0.5;
+      this.time_text.scale.y = 0.5;
       this.left_score_text.setText("" + this.left_score);
       this.right_score_text.setText("" + this.right_score);
       this.hud_stage.addChild(this.time_text);
