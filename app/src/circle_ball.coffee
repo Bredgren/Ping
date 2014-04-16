@@ -8,7 +8,7 @@ class CircleBall
   # pos and vel in pixels
   constructor: (@game, init_pos, init_vel) ->
     g = new PIXI.Graphics()
-    g.lineStyle(1, 0xFFFFFF)
+    g.lineStyle(2, 0xFFFFFF)
     g.drawCircle(0, 0, @RADIUS)
     g.moveTo(0, 0)
     g.lineTo(0, @RADIUS)

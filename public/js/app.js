@@ -20,7 +20,7 @@
 
       this.game = game;
       g = new PIXI.Graphics();
-      g.lineStyle(1, 0xFFFFFF);
+      g.lineStyle(2, 0xFFFFFF);
       g.drawCircle(0, 0, this.RADIUS);
       g.moveTo(0, 0);
       g.lineTo(0, this.RADIUS);
@@ -342,7 +342,7 @@
         right: false
       };
       g = new PIXI.Graphics();
-      g.lineStyle(1, 0xFFFFFF);
+      g.lineStyle(2, 0xFFFFFF);
       g.drawRect(0, 0, this.WIDTH, this.LENGTH);
       t = g.generateTexture();
       this.sprite = new PIXI.Sprite(t);
@@ -840,7 +840,7 @@
       this.right_score_text.position.x = 3 * settings.WIDTH / 4;
       this.right_score_text.position.y = 10;
       g = new PIXI.Graphics();
-      count = 20;
+      count = 30;
       for (x = _i = 0; 0 <= count ? _i < count : _i > count; x = 0 <= count ? ++_i : --_i) {
         g.lineStyle(1, 0xFFFFFF, 1 - (x / count));
         g.moveTo(x, 0);

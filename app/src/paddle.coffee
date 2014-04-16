@@ -20,7 +20,7 @@ class Paddle
       right: false
 
     g = new PIXI.Graphics()
-    g.lineStyle(1, 0xFFFFFF)
+    g.lineStyle(2, 0xFFFFFF)
     g.drawRect(0, 0, @WIDTH, @LENGTH)
     t = g.generateTexture()
     @sprite = new PIXI.Sprite(t)

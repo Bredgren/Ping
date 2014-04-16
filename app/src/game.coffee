@@ -307,7 +307,7 @@ class Game
     @right_score_text.position.y = 10
 
     g = new PIXI.Graphics()
-    count = 20
+    count = 30
     for x in [0...count]
       g.lineStyle(1, 0xFFFFFF, 1 - (x / count))
       g.moveTo(x, 0)

@@ -1,7 +1,5 @@
 (lower volume)
 
-- visual feedback for
-    - time limit
 - auditory feedback for
     - scoring
     - time limit (initial count down, last seconds, and end)
