@@ -2,6 +2,10 @@
 
 - simple AI
 - better control images
+- sound effect options
+    - on/off
+- look into firefox display issues
+- consider trying to make it work in IE
 
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
@@ -29,5 +33,7 @@
 - prevent ball from getting stuck behind paddles (contact listener?)
     - and/or only register points after contact with opposite wall/paddle
 - sudden death on tie?
+- sound effect options
+    - volume
 
 - fine-tune controls again
