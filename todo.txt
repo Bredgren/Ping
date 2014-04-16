@@ -1,9 +1,5 @@
 (lower volume)
 
-- auditory feedback for
-    - scoring
-    - time limit (initial count down, last seconds, and end)
-    - paddle contact with ball
 - simple AI
 - better control images
 

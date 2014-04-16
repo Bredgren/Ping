@@ -128,6 +128,33 @@
     PRINT_INPUT: false,
     WIDTH: 1000,
     HEIGHT: 500,
+    AUDIO_PATH: "assets/snd/",
+    SOUNDS: {
+      PADDLE_CONTACT: {
+        ID: "Paddle contact",
+        SRC: "paddle_contact.ogg"
+      },
+      SCORE: {
+        ID: "Score",
+        SRC: "score.ogg"
+      },
+      START_TIMER: {
+        ID: "Start timer",
+        SRC: "start_timer.ogg"
+      },
+      START_BUZZER: {
+        ID: "Start buzzer",
+        SRC: "start_buzzer.ogg"
+      },
+      END_TIMER: {
+        ID: "End timer",
+        SRC: "end_timer.ogg"
+      },
+      END_BUZZER: {
+        ID: "End buzzer",
+        SRC: "end_buzzer.ogg"
+      }
+    },
     PADDLE_X: 20,
     PPM: 30,
     BOX2D_TIME_STEP: 1 / 60,
@@ -916,21 +943,26 @@
     }
 
     Game.prototype.update = function() {
-      var decimal, dt, t, time;
+      var decimal, dt, new_time, t, time;
 
       t = (new Date()).getTime();
       dt = t - this._loop_time;
       this._loop_time = t;
       if (this.state === this.states.COUNT_DOWN) {
-        this._count_down -= dt / 1000;
+        new_time = this._count_down - dt / 1000;
+        if ((Math.ceil(new_time) < Math.ceil(this._count_down) || this._count_down === 3) && new_time > 0) {
+          createjs.Sound.play(settings.SOUNDS.START_TIMER.ID);
+        }
+        this._count_down = new_time;
         if (this._count_down <= 0) {
+          createjs.Sound.play(settings.SOUNDS.START_BUZZER.ID);
           this.state = this.states.GAME;
           this.hud_stage.removeChild(this.countdown_text);
         }
-        this.countdown_text.setText("" + Math.round(this._count_down));
+        this.countdown_text.setText("" + Math.ceil(this._count_down));
       } else if (this.state === this.states.GAME) {
-        this.time -= dt / 1000;
-        time = Math.ceil(this.time);
+        new_time = this.time - dt / 1000;
+        time = Math.ceil(new_time);
         t = "" + time;
         if (t.length === 1) {
           t = "00" + t;
@@ -938,11 +970,18 @@
           t = "0" + t;
         }
         this.time_text.setText(t);
-        if (this.time <= 10) {
-          decimal = this.time - Math.floor(this.time);
+        if (new_time <= 10) {
+          if ((Math.ceil(new_time) < Math.ceil(this.time) || this.time === 10) && new_time > 0) {
+            createjs.Sound.play(settings.SOUNDS.END_TIMER.ID);
+          }
+          if (new_time <= 0) {
+            createjs.Sound.play(settings.SOUNDS.END_BUZZER.ID);
+          }
+          decimal = new_time - Math.floor(new_time);
           this.time_text.scale.x = decimal + 0.4;
           this.time_text.scale.y = decimal + 0.4;
         }
+        this.time = new_time;
         if (this.time <= 0) {
           this.endGame();
           return;
@@ -1211,16 +1250,20 @@
           bodyB = contact.GetFixtureB().GetBody();
           if (bodyA === this.ball.body || bodyB === this.ball.body) {
             if (bodyA === this.left_boundary || bodyB === this.left_boundary) {
+              createjs.Sound.play(settings.SOUNDS.SCORE.ID);
               this.scoreRight();
             } else if (bodyA === this.right_boundary || bodyB === this.right_boundary) {
+              createjs.Sound.play(settings.SOUNDS.SCORE.ID);
               this.scoreLeft();
             } else if (bodyA === this.left_paddle.paddle_body || bodyB === this.left_paddle.paddle_body) {
+              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
               ball = this.ball.body;
               vel = ball.GetLinearVelocity();
               if (vel.x > 0) {
                 contact.SetEnabled(false);
               }
             } else if (bodyA === this.right_paddle.paddle_body || bodyB === this.right_paddle.paddle_body) {
+              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
               ball = this.ball.body;
               vel = ball.GetLinearVelocity();
               if (vel.x < 0) {
@@ -1239,10 +1282,30 @@
   })();
 
   $(function() {
-    var DOM_LOADED;
+    var DOM_LOADED, count, manifest, sound;
 
     DOM_LOADED = true;
-    return main();
+    if (!createjs.Sound.initializeDefaultPlugins()) {
+      console.log("Couldn't load sound");
+      return main();
+    } else {
+      manifest = [];
+      for (sound in settings.SOUNDS) {
+        manifest.push({
+          id: settings.SOUNDS[sound].ID,
+          src: settings.SOUNDS[sound].SRC
+        });
+      }
+      count = 0;
+      createjs.Sound.addEventListener("fileload", function(event) {
+        count++;
+        if (count === manifest.length) {
+          return main();
+        }
+      });
+      createjs.Sound.setVolume(0.5);
+      return createjs.Sound.registerManifest(manifest, settings.AUDIO_PATH);
+    }
   });
 
   W = settings.WIDTH;

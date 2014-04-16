@@ -6,11 +6,23 @@
 # Execute after document is loaded
 $ ->
   DOM_LOADED = true
-  # assets = []
-  # loader = new PIXI.AssetLoader(assets)
-  # loader.onComplete = main
-  # loader.load()
-  main()
+  if not createjs.Sound.initializeDefaultPlugins()
+    console.log("Couldn't load sound")
+    main()  # play with no sound
+  else
+    manifest = []
+    for sound of settings.SOUNDS
+      manifest.push({
+        id: settings.SOUNDS[sound].ID,
+        src: settings.SOUNDS[sound].SRC})
+
+    count = 0
+    createjs.Sound.addEventListener("fileload", (event) ->
+      count++
+      if count is manifest.length
+        main())
+    createjs.Sound.setVolume(0.5)
+    createjs.Sound.registerManifest(manifest, settings.AUDIO_PATH)
 
 W = settings.WIDTH
 H = settings.HEIGHT

@@ -395,24 +395,37 @@ class Game
     @_loop_time = t
 
     if @state is @states.COUNT_DOWN
-      @_count_down -= dt / 1000
+      new_time = @_count_down - dt / 1000
+      if ((Math.ceil(new_time) < Math.ceil(@_count_down) or
+         @_count_down is 3) and new_time > 0)
+        createjs.Sound.play(settings.SOUNDS.START_TIMER.ID)
+      @_count_down = new_time
       if @_count_down <= 0
+        createjs.Sound.play(settings.SOUNDS.START_BUZZER.ID)
         @state = @states.GAME
         @hud_stage.removeChild(@countdown_text)
-      @countdown_text.setText("" + Math.round(@_count_down))
+      @countdown_text.setText("" + Math.ceil(@_count_down))
     else if @state is @states.GAME
-      @time -= dt / 1000
-      time = Math.ceil(@time)
+      new_time = @time - dt / 1000
+      time = Math.ceil(new_time)
       t = "" + time
       if t.length is 1
         t = "00#{t}"
       else if t.length is 2
         t = "0#{t}"
       @time_text.setText(t)
-      if @time <= 10
-        decimal = @time - Math.floor(@time)
+      if new_time <= 10
+        if ((Math.ceil(new_time) < Math.ceil(@time) or
+           @time is 10) and new_time > 0)
+          createjs.Sound.play(settings.SOUNDS.END_TIMER.ID)
+        if new_time <= 0
+          createjs.Sound.play(settings.SOUNDS.END_BUZZER.ID)
+
+        decimal = new_time - Math.floor(new_time)
         @time_text.scale.x = decimal + 0.4
         @time_text.scale.y = decimal + 0.4
+
+      @time = new_time
 
       if @time <= 0
         @endGame()
@@ -630,11 +643,14 @@ class Game
         bodyB = contact.GetFixtureB().GetBody()
         if bodyA is @ball.body or bodyB is @ball.body
           if bodyA is @left_boundary or bodyB is @left_boundary
+            createjs.Sound.play(settings.SOUNDS.SCORE.ID)
             @scoreRight()
           else if bodyA is @right_boundary or bodyB is @right_boundary
+            createjs.Sound.play(settings.SOUNDS.SCORE.ID)
             @scoreLeft()
           else if (bodyA is @left_paddle.paddle_body or
                    bodyB is @left_paddle.paddle_body)
+            createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID)
             # paddle = @left_paddle.paddle_body
             ball = @ball.body
             # man = new b2Collision.b2WorldManifold()
@@ -645,6 +661,7 @@ class Game
               contact.SetEnabled(false)
           else if (bodyA is @right_paddle.paddle_body or
                    bodyB is @right_paddle.paddle_body)
+            createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID)
             ball = @ball.body
             # paddle = @right_paddle.paddle_body
             vel = ball.GetLinearVelocity()

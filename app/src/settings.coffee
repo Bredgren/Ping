@@ -5,6 +5,26 @@ settings = {
   PRINT_INPUT: false
   WIDTH: 1000
   HEIGHT: 500
+  AUDIO_PATH: "assets/snd/"
+  SOUNDS:
+    PADDLE_CONTACT:
+      ID: "Paddle contact"
+      SRC: "paddle_contact.ogg"
+    SCORE:
+      ID: "Score"
+      SRC: "score.ogg"
+    START_TIMER:
+      ID: "Start timer"
+      SRC: "start_timer.ogg"
+    START_BUZZER:
+      ID: "Start buzzer"
+      SRC: "start_buzzer.ogg"
+    END_TIMER:
+      ID: "End timer"
+      SRC: "end_timer.ogg"
+    END_BUZZER:
+      ID: "End buzzer"
+      SRC: "end_buzzer.ogg"
 
   PADDLE_X: 20  # pixels from the edge
 
