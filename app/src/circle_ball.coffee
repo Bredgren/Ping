@@ -86,6 +86,15 @@ class CircleBall
     @sprite.position.y = pos.y * settings.PPM
     @sprite.rotation = rot
 
+  position: () ->
+    return @body.GetPosition()
+
+  velocity: () ->
+    return @body.GetLinearVelocity()
+
+  angularVelocity: () ->
+    return @body.GetAngularVelocity()
+
   destroy: () ->
     body = @game.world.GetBodyList()
     while body

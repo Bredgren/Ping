@@ -1,6 +1,7 @@
 
 #_require ./circle_ball
 #_require ./debug_draw
+#_require ./normal_ai
 #_require ./paddle
 #_require ./settings
 
@@ -25,6 +26,9 @@ class Game
   _count_down: 3
 
   _player2_type: "human"
+
+  _normal_ai: null
+  _hard_ai: null
 
   GRAD_TIME: 20
   TIME_TEXT_SIZE: 50
@@ -387,6 +391,9 @@ class Game
     f.categoryBits = settings.COLLISION_CATEGORY.BOUNDARY
     fix.SetFilterData(f)
 
+    @_normal_ai = new NormalAI(@)
+    #@_hard_ai = new HardAI(@)
+
     @gotoMenu()
 
   update: () ->
@@ -432,6 +439,11 @@ class Game
         return
 
       @left_paddle.update()
+      if @_player2_type is "normal ai"
+        @_normal_ai.update()
+      if @_player2_type is "hard ai"
+        @_normal_ai.update()
+        # @_hard_ai.update()
       @right_paddle.update()
       @ball.update()
       @world.Step(
@@ -527,6 +539,8 @@ class Game
   endGame: () ->
     @state = @states.END
     @hud_stage.removeChild(@quit_text)
+    if @countdown_text in @hud_stage.children
+      @hud_stage.removeChild(@countdown_text)
     @hud_stage.addChild(@return_text)
     if @left_score > @right_score
       @victor_text.setText("Player 1 Wins!")
@@ -576,13 +590,17 @@ class Game
         when bindings.P1_RIGHT
           @left_paddle.startRight()
         when bindings.P2_UP
-          @right_paddle.startUp()
+          if @_player2_type is "human"
+            @right_paddle.startUp()
         when bindings.P2_DOWN
-          @right_paddle.startDown()
+          if @_player2_type is "human"
+            @right_paddle.startDown()
         when bindings.P2_LEFT
-          @right_paddle.startLeft()
+          if @_player2_type is "human"
+            @right_paddle.startLeft()
         when bindings.P2_RIGHT
-          @right_paddle.startRight()
+          if @_player2_type is "human"
+            @right_paddle.startRight()
 
     if key_code is bindings.START
       switch @state
@@ -591,7 +609,8 @@ class Game
         when @states.END
           @gotoMenu()
 
-    if key_code is bindings.END and @state is @states.GAME
+    if key_code is bindings.END and
+       (@state is @states.GAME or @state is @states.COUNT_DOWN)
       @endGame()
 
   onKeyUp: (key_code) ->
@@ -607,13 +626,17 @@ class Game
       when bindings.P1_RIGHT
         @left_paddle.endRight()
       when bindings.P2_UP
-        @right_paddle.endUp()
+        if @_player2_type is "human"
+          @right_paddle.endUp()
       when bindings.P2_DOWN
-        @right_paddle.endDown()
+        if @_player2_type is "human"
+          @right_paddle.endDown()
       when bindings.P2_LEFT
-        @right_paddle.endLeft()
+        if @_player2_type is "human"
+          @right_paddle.endLeft()
       when bindings.P2_RIGHT
-        @right_paddle.endRight()
+        if @_player2_type is "human"
+          @right_paddle.endRight()
 
   onMouseDown: (button, screen_pos) ->
 
