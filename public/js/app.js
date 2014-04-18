@@ -614,6 +614,12 @@
 
     Game.prototype.right_score = 0;
 
+    Game.prototype.play_sfx = true;
+
+    Game.prototype._fade_time = 1;
+
+    Game.prototype._start_time = 1;
+
     Game.prototype._loop_time = 0;
 
     Game.prototype._count_down = 3;
@@ -633,7 +639,7 @@
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, human, human_selected, offset, rt, style, t, x, y, _i,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, style, t, w, x, y, _i,
         _this = this;
 
       this.stage = stage;
@@ -878,6 +884,101 @@
       y = cy * 0.7 + 2 * (25 + 10);
       this.ai_hard_box.x = Math.round(x - this.ai_hard_box.width / 2);
       this.ai_hard_box.y = Math.round(y - this.ai_hard_box.height / 2);
+      w = 75;
+      h = 25;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.beginFill(0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      g.endFill();
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#000000"
+      };
+      t = new PIXI.Text("SFX: ON", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      sfx_on = rt;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      t = new PIXI.Text("SFX: ON", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      sfx_on_hover = rt;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      t = new PIXI.Text("SFX: OFF", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      sfx_off = rt;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.beginFill(0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      g.endFill();
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#000000"
+      };
+      t = new PIXI.Text("SFX: OFF", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      sfx_off_hover = rt;
+      this.sfx_box = new PIXI.Sprite(sfx_on);
+      this.sfx_box.interactive = true;
+      this.sfx_box.hitArea = new PIXI.Rectangle(0, 0, w, h);
+      this.sfx_box.mouseover = function(data) {
+        if (_this.play_sfx) {
+          return data.target.setTexture(sfx_on_hover);
+        } else {
+          return data.target.setTexture(sfx_off_hover);
+        }
+      };
+      this.sfx_box.mouseout = function(data) {
+        if (_this.play_sfx) {
+          return data.target.setTexture(sfx_on);
+        } else {
+          return data.target.setTexture(sfx_off);
+        }
+      };
+      this.sfx_box.click = function(data) {
+        _this.play_sfx = !_this.play_sfx;
+        if (_this.play_sfx) {
+          return data.target.setTexture(sfx_on_hover);
+        } else {
+          return data.target.setTexture(sfx_off_hover);
+        }
+      };
+      this.sfx_box.x = settings.WIDTH - w - 10;
+      this.sfx_box.y = settings.HEIGHT - h - 10;
       style = {
         font: "15px Arial",
         fill: "#FFFFFF"
@@ -999,14 +1100,21 @@
       t = (new Date()).getTime();
       dt = t - this._loop_time;
       this._loop_time = t;
+      if (dt < 10000) {
+        this._start_time -= dt / 1000;
+        if (this._start_time > 0) {
+          this.hud_stage.alpha = 1 - (this._start_time / this._fade_time);
+          this.game_stage.alpha = 1 - (this._start_time / this._fade_time);
+        }
+      }
       if (this.state === this.states.COUNT_DOWN) {
         new_time = this._count_down - dt / 1000;
         if ((Math.ceil(new_time) < Math.ceil(this._count_down) || this._count_down === 3) && new_time > 0) {
-          createjs.Sound.play(settings.SOUNDS.START_TIMER.ID);
+          this._playSound(settings.SOUNDS.START_TIMER.ID);
         }
         this._count_down = new_time;
         if (this._count_down <= 0) {
-          createjs.Sound.play(settings.SOUNDS.START_BUZZER.ID);
+          this._playSound(settings.SOUNDS.START_BUZZER.ID);
           this.state = this.states.GAME;
           this.hud_stage.removeChild(this.countdown_text);
         }
@@ -1023,10 +1131,10 @@
         this.time_text.setText(t);
         if (new_time <= 10) {
           if ((Math.ceil(new_time) < Math.ceil(this.time) || this.time === 10) && new_time > 0) {
-            createjs.Sound.play(settings.SOUNDS.END_TIMER.ID);
+            this._playSound(settings.SOUNDS.END_TIMER.ID);
           }
           if (new_time <= 0) {
-            createjs.Sound.play(settings.SOUNDS.END_BUZZER.ID);
+            this._playSound(settings.SOUNDS.END_BUZZER.ID);
           }
           decimal = new_time - Math.floor(new_time);
           this.time_text.scale.x = decimal + 0.4;
@@ -1093,7 +1201,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, style, t, vel, _ref, _ref1, _ref2, _ref3;
+      var center, style, t, vel, _ref, _ref1, _ref2, _ref3, _ref4;
 
       this.state = this.states.COUNT_DOWN;
       this._count_down = 3;
@@ -1113,6 +1221,9 @@
       }
       if (_ref3 = this.ai_hard_box, __indexOf.call(this.hud_stage.children, _ref3) >= 0) {
         this.hud_stage.removeChild(this.ai_hard_box);
+      }
+      if (_ref4 = this.sfx_box, __indexOf.call(this.hud_stage.children, _ref4) >= 0) {
+        this.hud_stage.removeChild(this.sfx_box);
       }
       this.hud_stage.addChild(this.quit_text);
       this.hud_stage.addChild(this.countdown_text);
@@ -1151,7 +1262,8 @@
       this.right_score_text.setText("" + this.right_score);
       this.hud_stage.addChild(this.time_text);
       this.hud_stage.addChild(this.left_score_text);
-      return this.hud_stage.addChild(this.right_score_text);
+      this.hud_stage.addChild(this.right_score_text);
+      return this._start_time = this._fade_time;
     };
 
     Game.prototype.endGame = function() {
@@ -1191,6 +1303,7 @@
       this.hud_stage.addChild(this.human_box);
       this.hud_stage.addChild(this.ai_norm_box);
       this.hud_stage.addChild(this.ai_hard_box);
+      this.hud_stage.addChild(this.sfx_box);
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.return_text);
       }
@@ -1204,8 +1317,9 @@
         this.hud_stage.removeChild(this.right_score_text);
       }
       if (_ref4 = this.victor_text, __indexOf.call(this.hud_stage.children, _ref4) >= 0) {
-        return this.hud_stage.removeChild(this.victor_text);
+        this.hud_stage.removeChild(this.victor_text);
       }
+      return this._start_time = this._fade_time;
     };
 
     Game.prototype.onKeyDown = function(key_code) {
@@ -1333,12 +1447,12 @@
           bodyB = contact.GetFixtureB().GetBody();
           if (bodyA === this.ball.body || bodyB === this.ball.body) {
             if (this._can_score_r && (bodyA === this.left_boundary || bodyB === this.left_boundary)) {
-              createjs.Sound.play(settings.SOUNDS.SCORE.ID);
+              this._playSound(settings.SOUNDS.SCORE.ID);
               this.scoreRight();
               this._can_score_r = false;
               this._can_score_l = true;
             } else if (this._can_score_l && (bodyA === this.right_boundary || bodyB === this.right_boundary)) {
-              createjs.Sound.play(settings.SOUNDS.SCORE.ID);
+              this._playSound(settings.SOUNDS.SCORE.ID);
               this.scoreLeft();
               this._can_score_l = false;
               this._can_score_r = true;
@@ -1346,14 +1460,14 @@
               ball_pos = this.ball.position();
               paddle_pos = this.left_paddle.position();
               if (ball_pos.x > paddle_pos.x) {
-                createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
+                this._playSound(settings.SOUNDS.PADDLE_CONTACT.ID);
               }
               this._can_score_l = true;
             } else if (bodyA === this.right_paddle.paddle_body || bodyB === this.right_paddle.paddle_body) {
               ball_pos = this.ball.position();
               paddle_pos = this.right_paddle.position();
               if (ball_pos.x < paddle_pos.x) {
-                createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
+                this._playSound(settings.SOUNDS.PADDLE_CONTACT.ID);
               }
               this._can_score_r = true;
             }
@@ -1362,6 +1476,12 @@
         _results.push(contact = contact.GetNext());
       }
       return _results;
+    };
+
+    Game.prototype._playSound = function(id) {
+      if (this.play_sfx) {
+        return createjs.Sound.play(id);
+      }
     };
 
     return Game;

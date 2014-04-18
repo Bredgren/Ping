@@ -22,6 +22,11 @@ class Game
   left_score: 0
   right_score: 0
 
+  play_sfx: true
+
+  _fade_time: 1
+  _start_time: 1
+
   _loop_time: 0
   _count_down: 3
 
@@ -256,6 +261,92 @@ class Game
     @ai_hard_box.x = Math.round(x - @ai_hard_box.width / 2)
     @ai_hard_box.y = Math.round(y - @ai_hard_box.height / 2)
 
+    w = 75
+    h = 25
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.beginFill(0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    g.endFill()
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#000000"}
+    t = new PIXI.Text("SFX: ON", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    sfx_on = rt
+
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    t = new PIXI.Text("SFX: ON", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    sfx_on_hover = rt
+
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    t = new PIXI.Text("SFX: OFF", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    sfx_off = rt
+
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.beginFill(0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    g.endFill()
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#000000"}
+    t = new PIXI.Text("SFX: OFF", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    sfx_off_hover = rt
+
+    @sfx_box = new PIXI.Sprite(sfx_on)
+    @sfx_box.interactive = true
+    @sfx_box.hitArea = new PIXI.Rectangle(0, 0, w, h)
+    @sfx_box.mouseover = (data) =>
+      if @play_sfx
+        data.target.setTexture(sfx_on_hover)
+      else
+        data.target.setTexture(sfx_off_hover)
+    @sfx_box.mouseout = (data) =>
+      if @play_sfx
+        data.target.setTexture(sfx_on)
+      else
+        data.target.setTexture(sfx_off)
+    @sfx_box.click = (data) =>
+      @play_sfx = not @play_sfx
+      if @play_sfx
+        data.target.setTexture(sfx_on_hover)
+      else
+        data.target.setTexture(sfx_off_hover)
+    @sfx_box.x = settings.WIDTH - w - 10
+    @sfx_box.y = settings.HEIGHT - h - 10
+
     style = {font: "15px Arial", fill: "#FFFFFF"}
     @begin_text = new PIXI.Text("Press SPACE to begin", style)
     @return_text = new PIXI.Text("Press SPACE to return to menu", style)
@@ -376,14 +467,20 @@ class Game
     dt = t - @_loop_time
     @_loop_time = t
 
+    if dt < 10000
+      @_start_time -= dt / 1000
+      if @_start_time > 0
+        @hud_stage.alpha = 1 - (@_start_time / @_fade_time)
+        @game_stage.alpha = 1 - (@_start_time / @_fade_time)
+
     if @state is @states.COUNT_DOWN
       new_time = @_count_down - dt / 1000
       if ((Math.ceil(new_time) < Math.ceil(@_count_down) or
          @_count_down is 3) and new_time > 0)
-        createjs.Sound.play(settings.SOUNDS.START_TIMER.ID)
+        @_playSound(settings.SOUNDS.START_TIMER.ID)
       @_count_down = new_time
       if @_count_down <= 0
-        createjs.Sound.play(settings.SOUNDS.START_BUZZER.ID)
+        @_playSound(settings.SOUNDS.START_BUZZER.ID)
         @state = @states.GAME
         @hud_stage.removeChild(@countdown_text)
       @countdown_text.setText("" + Math.ceil(@_count_down))
@@ -399,9 +496,9 @@ class Game
       if new_time <= 10
         if ((Math.ceil(new_time) < Math.ceil(@time) or
            @time is 10) and new_time > 0)
-          createjs.Sound.play(settings.SOUNDS.END_TIMER.ID)
+          @_playSound(settings.SOUNDS.END_TIMER.ID)
         if new_time <= 0
-          createjs.Sound.play(settings.SOUNDS.END_BUZZER.ID)
+          @_playSound(settings.SOUNDS.END_BUZZER.ID)
 
         decimal = new_time - Math.floor(new_time)
         @time_text.scale.x = decimal + 0.4
@@ -478,6 +575,8 @@ class Game
       @hud_stage.removeChild(@ai_norm_box)
     if @ai_hard_box in @hud_stage.children
       @hud_stage.removeChild(@ai_hard_box)
+    if @sfx_box in @hud_stage.children
+      @hud_stage.removeChild(@sfx_box)
 
     @hud_stage.addChild(@quit_text)
     @hud_stage.addChild(@countdown_text)
@@ -514,6 +613,8 @@ class Game
     @hud_stage.addChild(@left_score_text)
     @hud_stage.addChild(@right_score_text)
 
+    @_start_time = @_fade_time
+
   endGame: () ->
     @state = @states.END
     @hud_stage.removeChild(@quit_text)
@@ -543,6 +644,7 @@ class Game
     @hud_stage.addChild(@human_box)
     @hud_stage.addChild(@ai_norm_box)
     @hud_stage.addChild(@ai_hard_box)
+    @hud_stage.addChild(@sfx_box)
 
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)
@@ -554,6 +656,8 @@ class Game
       @hud_stage.removeChild(@right_score_text)
     if @victor_text in @hud_stage.children
       @hud_stage.removeChild(@victor_text)
+
+    @_start_time = @_fade_time
 
   onKeyDown: (key_code) ->
     bindings = settings.BINDINGS
@@ -645,13 +749,13 @@ class Game
         if bodyA is @ball.body or bodyB is @ball.body
           if @_can_score_r and
              (bodyA is @left_boundary or bodyB is @left_boundary)
-            createjs.Sound.play(settings.SOUNDS.SCORE.ID)
+            @_playSound(settings.SOUNDS.SCORE.ID)
             @scoreRight()
             @_can_score_r = false
             @_can_score_l = true
           else if @_can_score_l and
                   (bodyA is @right_boundary or bodyB is @right_boundary)
-            createjs.Sound.play(settings.SOUNDS.SCORE.ID)
+            @_playSound(settings.SOUNDS.SCORE.ID)
             @scoreLeft()
             @_can_score_l = false
             @_can_score_r = true
@@ -660,7 +764,7 @@ class Game
             ball_pos = @ball.position()
             paddle_pos = @left_paddle.position()
             if ball_pos.x > paddle_pos.x
-              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID)
+              @_playSound(settings.SOUNDS.PADDLE_CONTACT.ID)
             @_can_score_l = true
             # # paddle = @left_paddle.paddle_body
             # ball = @ball.body
@@ -675,7 +779,7 @@ class Game
             ball_pos = @ball.position()
             paddle_pos = @right_paddle.position()
             if ball_pos.x < paddle_pos.x
-              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID)
+              @_playSound(settings.SOUNDS.PADDLE_CONTACT.ID)
             @_can_score_r = true
             # ball = @ball.body
             # # paddle = @right_paddle.paddle_body
@@ -684,3 +788,7 @@ class Game
             #   contact.SetEnabled(false)
 
       contact = contact.GetNext()
+
+  _playSound: (id) ->
+    if @play_sfx
+      createjs.Sound.play(id)

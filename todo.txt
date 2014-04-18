@@ -1,8 +1,5 @@
 (lower volume)
 
-- better control images
-- sound effect options
-    - on/off
 - look into firefox display issues
 - consider trying to make it work in IE
 
