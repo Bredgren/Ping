@@ -367,7 +367,7 @@
       ball_vel = ball.velocity();
       range = 5.0;
       if (ball_vel.x > 0 || ball_pos.x > paddle_pos.x - range) {
-        padding = Math.random() * 2.0 + 0.75;
+        padding = Math.random() * 3.5 + 0.9;
         if (ball_pos.y > paddle_pos.y + padding) {
           paddle.endUp();
           paddle.startDown();
@@ -624,12 +624,16 @@
 
     Game.prototype._hard_ai = null;
 
+    Game.prototype._can_score_l = true;
+
+    Game.prototype._can_score_r = true;
+
     Game.prototype.GRAD_TIME = 20;
 
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, h, human, human_selected, offset, rt, style, t, w, x, y, _i,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, g, human, human_selected, offset, rt, style, t, x, y, _i,
         _this = this;
 
       this.stage = stage;
@@ -670,34 +674,10 @@
       this.player2_text = new PIXI.Text("Player 2", style);
       this.player2_text.position.x = settings.WIDTH - cx / 3 - this.player2_text.width / 2;
       this.player2_text.position.y = cy / 2;
-      this.controls1_text = new PIXI.Text("  W\nA S D", style);
-      this.controls1_text.position.x = Math.round(cx / 3 - this.controls1_text.width / 2);
-      this.controls1_text.position.y = Math.round(cy * 0.75);
-      w = 75;
-      h = 75;
-      g = new PIXI.Graphics();
-      g.lineStyle(1, 0xFFFFFF);
-      g.moveTo(w / 2, h * 0.4);
-      g.lineTo(w / 2, 0);
-      g.lineTo(w * 0.4, h * 0.2);
-      g.moveTo(w / 2, 0);
-      g.lineTo(w * 0.6, h * 0.2);
-      g.moveTo(w / 2, h * 0.6);
-      g.lineTo(w / 2, h);
-      g.lineTo(w * 0.4, h * 0.8);
-      g.moveTo(w / 2, h);
-      g.lineTo(w * 0.6, h * 0.8);
-      g.moveTo(w * 0.4, h / 2);
-      g.lineTo(0, h / 2);
-      g.lineTo(w * 0.2, h * 0.4);
-      g.moveTo(0, h / 2);
-      g.lineTo(w * 0.2, h * 0.6);
-      g.moveTo(w * 0.6, h / 2);
-      g.lineTo(w, h / 2);
-      g.lineTo(w * 0.8, h * 0.4);
-      g.moveTo(w, h / 2);
-      g.lineTo(w * 0.8, h * 0.6);
-      this.controls2 = new PIXI.Sprite(g.generateTexture());
+      this.controls1 = new PIXI.Sprite.fromImage("assets/img/wasd.png");
+      this.controls1.position.x = Math.round(cx / 4 - this.controls1.width / 2);
+      this.controls1.position.y = Math.round(cy * 0.65 - this.controls1.height / 2);
+      this.controls2 = new PIXI.Sprite.fromImage("assets/img/arrows.png");
       this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6 - this.controls2.width / 2);
       this.controls2.position.y = Math.round(cy * 0.65);
       rt = new PIXI.RenderTexture(76, 26);
@@ -1121,7 +1101,7 @@
       this.hud_stage.removeChild(this.title_text);
       this.hud_stage.removeChild(this.player1_text);
       this.hud_stage.removeChild(this.player2_text);
-      this.hud_stage.removeChild(this.controls1_text);
+      this.hud_stage.removeChild(this.controls1);
       if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.controls2);
       }
@@ -1150,6 +1130,8 @@
       this.time = this.time_limit;
       this.left_score = 0;
       this.right_score = 0;
+      this._can_score_l = true;
+      this._can_score_r = true;
       t = "" + Math.ceil(this.time);
       if (t.length === 1) {
         t = "00" + t;
@@ -1202,7 +1184,7 @@
       this.hud_stage.addChild(this.title_text);
       this.hud_stage.addChild(this.player1_text);
       this.hud_stage.addChild(this.player2_text);
-      this.hud_stage.addChild(this.controls1_text);
+      this.hud_stage.addChild(this.controls1);
       if (this._player2_type === "human") {
         this.hud_stage.addChild(this.controls2);
       }
@@ -1341,7 +1323,7 @@
     };
 
     Game.prototype._checkContacts = function() {
-      var ball, bodyA, bodyB, contact, vel, _results;
+      var ball_pos, bodyA, bodyB, contact, paddle_pos, _results;
 
       contact = this.world.GetContactList();
       _results = [];
@@ -1350,26 +1332,30 @@
           bodyA = contact.GetFixtureA().GetBody();
           bodyB = contact.GetFixtureB().GetBody();
           if (bodyA === this.ball.body || bodyB === this.ball.body) {
-            if (bodyA === this.left_boundary || bodyB === this.left_boundary) {
+            if (this._can_score_r && (bodyA === this.left_boundary || bodyB === this.left_boundary)) {
               createjs.Sound.play(settings.SOUNDS.SCORE.ID);
               this.scoreRight();
-            } else if (bodyA === this.right_boundary || bodyB === this.right_boundary) {
+              this._can_score_r = false;
+              this._can_score_l = true;
+            } else if (this._can_score_l && (bodyA === this.right_boundary || bodyB === this.right_boundary)) {
               createjs.Sound.play(settings.SOUNDS.SCORE.ID);
               this.scoreLeft();
+              this._can_score_l = false;
+              this._can_score_r = true;
             } else if (bodyA === this.left_paddle.paddle_body || bodyB === this.left_paddle.paddle_body) {
-              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
-              ball = this.ball.body;
-              vel = ball.GetLinearVelocity();
-              if (vel.x > 0) {
-                contact.SetEnabled(false);
+              ball_pos = this.ball.position();
+              paddle_pos = this.left_paddle.position();
+              if (ball_pos.x > paddle_pos.x) {
+                createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
               }
+              this._can_score_l = true;
             } else if (bodyA === this.right_paddle.paddle_body || bodyB === this.right_paddle.paddle_body) {
-              createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
-              ball = this.ball.body;
-              vel = ball.GetLinearVelocity();
-              if (vel.x < 0) {
-                contact.SetEnabled(false);
+              ball_pos = this.ball.position();
+              paddle_pos = this.right_paddle.position();
+              if (ball_pos.x < paddle_pos.x) {
+                createjs.Sound.play(settings.SOUNDS.PADDLE_CONTACT.ID);
               }
+              this._can_score_r = true;
             }
           }
         }

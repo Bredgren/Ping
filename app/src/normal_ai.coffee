@@ -16,7 +16,7 @@ class NormalAI
     range = 5.0
 
     if ball_vel.x > 0 or ball_pos.x > paddle_pos.x - range
-      padding = Math.random() * 2.0 + 0.75
+      padding = Math.random() * 3.5 + 0.9
 
       if ball_pos.y > paddle_pos.y + padding
         paddle.endUp()

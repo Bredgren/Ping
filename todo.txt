@@ -1,6 +1,5 @@
 (lower volume)
 
-- simple AI
 - better control images
 - sound effect options
     - on/off
@@ -31,7 +30,6 @@
 - display stats
 - add ability to unlock balls
 - prevent ball from getting stuck behind paddles (contact listener?)
-    - and/or only register points after contact with opposite wall/paddle
 - sudden death on tie?
 - sound effect options
     - volume
