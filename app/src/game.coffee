@@ -581,8 +581,8 @@ class Game
     @hud_stage.addChild(@quit_text)
     @hud_stage.addChild(@countdown_text)
 
-    @left_paddle = new Paddle(@, settings.PADDLE_X)
-    @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE_X)
+    @left_paddle = new Paddle(@, settings.PADDLE.X)
+    @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE.X)
     center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
     vel = {x: -50, y: 0}
     @ball = new CircleBall(@, center, vel)

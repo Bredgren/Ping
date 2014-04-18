@@ -1,24 +1,19 @@
 
 class CircleBall
-  RADIUS: 15
-  MIN_X_VEL: 20
-  MAX_ANGLE: 60 / 180 * Math.PI
-  MAGNUS_SCALE: .05
-
   # pos and vel in pixels
   constructor: (@game, init_pos, init_vel) ->
     g = new PIXI.Graphics()
     g.lineStyle(2, 0xFFFFFF)
-    g.drawCircle(0, 0, @RADIUS)
+    g.drawCircle(0, 0, settings.BALL.SIZE)
     g.moveTo(0, 0)
-    g.lineTo(0, @RADIUS)
+    g.lineTo(0, settings.BALL.SIZE)
     t = g.generateTexture()
     @sprite = new PIXI.Sprite(t)
     @sprite.anchor.x = 0.5
     @sprite.anchor.y = 0.5
     @game.game_stage.addChild(@sprite)
 
-    b2_radius = @RADIUS / settings.PPM  #
+    b2_radius = settings.BALL.SIZE / settings.PPM  #
     b2_x = init_pos.x / settings.PPM  #
     b2_y = init_pos.y / settings.PPM  #
 
@@ -26,6 +21,7 @@ class CircleBall
     bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody
     bodyDef.position.x = b2_x
     bodyDef.position.y = b2_y
+    bodyDef.bullet = true
 
     fixDef = new b2Dynamics.b2FixtureDef()
     fixDef.density = 0.1
@@ -45,16 +41,17 @@ class CircleBall
   update: () ->
     vel = @body.GetLinearVelocity()
     angle = Math.atan(vel.y / vel.x)
-    if (Math.abs(angle) > @MAX_ANGLE)
-      target_angle = (if angle > 0 then 1 else -1) * @MAX_ANGLE
+    a = settings.BALL.MAX_ANGLE / 180 * Math.PI
+    if (Math.abs(angle) > a)
+      target_angle = (if angle > 0 then 1 else -1) * a
       dif = target_angle - angle
       x = vel.x * Math.cos(dif) - vel.y * Math.sin(dif)
       y = vel.x * Math.sin(dif) + vel.y * Math.cos(dif)
       vel.x = x
       vel.y = y
 
-    if (Math.abs(vel.x) < @MIN_X_VEL)
-      vel.x = (if vel.x > 0 then 1 else -1) * @MIN_X_VEL
+    if (Math.abs(vel.x) < settings.BALL.MIN_X_VEL)
+      vel.x = (if vel.x > 0 then 1 else -1) * settings.BALL.MIN_X_VEL
       @body.SetLinearVelocity(vel)
 
     @body.SetLinearVelocity(vel)
@@ -67,7 +64,7 @@ class CircleBall
       magnus_dir.y *= -1
     mag = Math.sqrt(magnus_dir.x * magnus_dir.x + magnus_dir.y * magnus_dir.y)
     magnus_unit = {x: magnus_dir.x / mag, y: magnus_dir.y / mag}
-    mag = spin * @MAGNUS_SCALE
+    mag = spin * settings.BALL.MAGNUS_FORCE
     magnus_force = new b2Vec2( magnus_unit.x * mag, magnus_unit.y * mag)
     @body.ApplyForce(magnus_force, @body.GetPosition())
 

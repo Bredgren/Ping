@@ -47,6 +47,18 @@ main = ->
 
   game = new Game(stage)
 
+  gui = new dat.GUI()
+  paddle_folder = gui.addFolder('Paddle')
+  paddle_folder.add(settings.PADDLE, 'MOVE_FORCE')
+  paddle_folder.add(settings.PADDLE, 'MAX_VEL')
+  paddle_folder.add(settings.PADDLE, 'ANGLE')
+  paddle_folder.add(settings.PADDLE, 'DAMPING_MOVE')
+  paddle_folder.add(settings.PADDLE, 'DAMPING_STILL')
+  ball_folder = gui.addFolder('Ball')
+  ball_folder.add(settings.BALL, 'MIN_X_VEL')
+  ball_folder.add(settings.BALL, 'MAX_ANGLE')
+  ball_folder.add(settings.BALL, 'MAGNUS_FORCE')
+
   ##############################################################################
   # Set event handlers
 

@@ -7,35 +7,28 @@
     __slice = [].slice;
 
   CircleBall = (function() {
-    CircleBall.prototype.RADIUS = 15;
-
-    CircleBall.prototype.MIN_X_VEL = 20;
-
-    CircleBall.prototype.MAX_ANGLE = 60 / 180 * Math.PI;
-
-    CircleBall.prototype.MAGNUS_SCALE = .05;
-
     function CircleBall(game, init_pos, init_vel) {
       var b2_radius, b2_x, b2_y, bodyDef, f, fixDef, g, t, vel;
 
       this.game = game;
       g = new PIXI.Graphics();
       g.lineStyle(2, 0xFFFFFF);
-      g.drawCircle(0, 0, this.RADIUS);
+      g.drawCircle(0, 0, settings.BALL.SIZE);
       g.moveTo(0, 0);
-      g.lineTo(0, this.RADIUS);
+      g.lineTo(0, settings.BALL.SIZE);
       t = g.generateTexture();
       this.sprite = new PIXI.Sprite(t);
       this.sprite.anchor.x = 0.5;
       this.sprite.anchor.y = 0.5;
       this.game.game_stage.addChild(this.sprite);
-      b2_radius = this.RADIUS / settings.PPM;
+      b2_radius = settings.BALL.SIZE / settings.PPM;
       b2_x = init_pos.x / settings.PPM;
       b2_y = init_pos.y / settings.PPM;
       bodyDef = new b2Dynamics.b2BodyDef();
       bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody;
       bodyDef.position.x = b2_x;
       bodyDef.position.y = b2_y;
+      bodyDef.bullet = true;
       fixDef = new b2Dynamics.b2FixtureDef();
       fixDef.density = 0.1;
       fixDef.friction = 0.5;
@@ -51,20 +44,21 @@
     }
 
     CircleBall.prototype.update = function() {
-      var angle, c, dif, f, mag, magnus_dir, magnus_force, magnus_unit, spin, target_angle, vel, x, y;
+      var a, angle, c, dif, f, mag, magnus_dir, magnus_force, magnus_unit, spin, target_angle, vel, x, y;
 
       vel = this.body.GetLinearVelocity();
       angle = Math.atan(vel.y / vel.x);
-      if (Math.abs(angle) > this.MAX_ANGLE) {
-        target_angle = (angle > 0 ? 1 : -1) * this.MAX_ANGLE;
+      a = settings.BALL.MAX_ANGLE / 180 * Math.PI;
+      if (Math.abs(angle) > a) {
+        target_angle = (angle > 0 ? 1 : -1) * a;
         dif = target_angle - angle;
         x = vel.x * Math.cos(dif) - vel.y * Math.sin(dif);
         y = vel.x * Math.sin(dif) + vel.y * Math.cos(dif);
         vel.x = x;
         vel.y = y;
       }
-      if (Math.abs(vel.x) < this.MIN_X_VEL) {
-        vel.x = (vel.x > 0 ? 1 : -1) * this.MIN_X_VEL;
+      if (Math.abs(vel.x) < settings.BALL.MIN_X_VEL) {
+        vel.x = (vel.x > 0 ? 1 : -1) * settings.BALL.MIN_X_VEL;
         this.body.SetLinearVelocity(vel);
       }
       this.body.SetLinearVelocity(vel);
@@ -82,7 +76,7 @@
         x: magnus_dir.x / mag,
         y: magnus_dir.y / mag
       };
-      mag = spin * this.MAGNUS_SCALE;
+      mag = spin * settings.BALL.MAGNUS_FORCE;
       magnus_force = new b2Vec2(magnus_unit.x * mag, magnus_unit.y * mag);
       this.body.ApplyForce(magnus_force, this.body.GetPosition());
       f = this.body.GetFixtureList().GetFilterData();
@@ -167,7 +161,22 @@
         SRC: "end_buzzer.ogg"
       }
     },
-    PADDLE_X: 20,
+    PADDLE: {
+      X: 20,
+      LENGTH: 75,
+      WIDTH: 10,
+      MOVE_FORCE: 200,
+      MAX_VEL: 100,
+      ANGLE: 20,
+      DAMPING_MOVE: 0,
+      DAMPING_STILL: 10
+    },
+    BALL: {
+      SIZE: 15,
+      MIN_X_VEL: 20,
+      MAX_ANGLE: 60,
+      MAGNUS_FORCE: .05
+    },
     PPM: 30,
     BOX2D_TIME_STEP: 1 / 60,
     BOX2D_VI: 10,
@@ -405,20 +414,6 @@
   })();
 
   Paddle = (function() {
-    Paddle.prototype.LENGTH = 75;
-
-    Paddle.prototype.WIDTH = 10;
-
-    Paddle.prototype.FORCE = 200;
-
-    Paddle.prototype.MAX_VEL = 100;
-
-    Paddle.prototype.ANGLE = 20;
-
-    Paddle.prototype.DAMPING_MOVE = 0;
-
-    Paddle.prototype.DAMPING_STILL = 5;
-
     Paddle.prototype.buttons = null;
 
     function Paddle(game, x, start_y) {
@@ -436,14 +431,14 @@
       };
       g = new PIXI.Graphics();
       g.lineStyle(2, 0xFFFFFF);
-      g.drawRect(0, 0, this.WIDTH, this.LENGTH);
+      g.drawRect(0, 0, settings.PADDLE.WIDTH, settings.PADDLE.LENGTH);
       t = g.generateTexture();
       this.sprite = new PIXI.Sprite(t);
       this.sprite.anchor.x = 0.5;
       this.sprite.anchor.y = 0.5;
       this.game.game_stage.addChild(this.sprite);
-      b2_width = this.WIDTH / settings.PPM;
-      b2_length = this.LENGTH / settings.PPM;
+      b2_width = settings.PADDLE.WIDTH / settings.PPM;
+      b2_length = settings.PADDLE.LENGTH / settings.PPM;
       b2_x = x / settings.PPM;
       b2_y = start_y / settings.PPM;
       bodyDef = new b2Dynamics.b2BodyDef();
@@ -451,6 +446,7 @@
       bodyDef.position.x = b2_x;
       bodyDef.position.y = b2_y;
       bodyDef.fixedRotation = true;
+      bodyDef.bullet = true;
       fixDef = new b2Dynamics.b2FixtureDef();
       fixDef.density = 1.0;
       fixDef.friction = 0.5;
@@ -518,25 +514,25 @@
         }
       }
       if (this.buttons.up || this.buttons.down) {
-        body.SetLinearDamping(this.DAMPING_MOVE);
+        body.SetLinearDamping(settings.PADDLE.DAMPING_MOVE);
       } else {
-        body.SetLinearDamping(this.DAMPING_STILL);
+        body.SetLinearDamping(settings.PADDLE.DAMPING_STILL);
       }
-      dir.Multiply(this.FORCE);
+      dir.Multiply(settings.PADDLE.MOVE_FORCE);
       body.ApplyForce(dir, pos);
-      if (Math.abs(vel.x) > this.MAX_VEL) {
-        vel.x = (vel.x > 0 ? 1 : -1) * this.MAX_VEL;
+      if (Math.abs(vel.x) > settings.PADDLE.MAX_VEL) {
+        vel.x = (vel.x > 0 ? 1 : -1) * settings.PADDLE.MAX_VEL;
         body.SetLinearVelocity(vel);
       }
-      if (Math.abs(vel.y) > this.MAX_VEL) {
-        vel.y = (vel.y > 0 ? 1 : -1) * this.MAX_VEL;
+      if (Math.abs(vel.y) > settings.PADDLE.MAX_VEL) {
+        vel.y = (vel.y > 0 ? 1 : -1) * settings.PADDLE.MAX_VEL;
         body.SetLinearVelocity(vel);
       }
       if (this.buttons.left !== this.buttons.right) {
         if (this.buttons.left) {
-          body.SetAngle(-Math.PI / 180 * this.ANGLE);
+          body.SetAngle(-Math.PI / 180 * settings.PADDLE.ANGLE);
         } else if (this.buttons.right) {
-          body.SetAngle(Math.PI / 180 * this.ANGLE);
+          body.SetAngle(Math.PI / 180 * settings.PADDLE.ANGLE);
         }
       }
       if (!this.buttons.left && !this.buttons.right) {
@@ -1227,8 +1223,8 @@
       }
       this.hud_stage.addChild(this.quit_text);
       this.hud_stage.addChild(this.countdown_text);
-      this.left_paddle = new Paddle(this, settings.PADDLE_X);
-      this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE_X);
+      this.left_paddle = new Paddle(this, settings.PADDLE.X);
+      this.right_paddle = new Paddle(this, settings.WIDTH - settings.PADDLE.X);
       center = {
         x: settings.WIDTH / 2,
         y: settings.HEIGHT / 2
@@ -1520,7 +1516,7 @@
   H = settings.HEIGHT;
 
   main = function() {
-    var black, blurHandler, body, canvas, clear, clickHandler, container, contextMenuHandler, draw, event_catcher, focusHandler, game, keyDownListener, keyUpListener, main_loop, mouseDownHandler, mouseMoveHandler, mouseOutHandler, mouseUpHandler, mouseWheelHandler, onBeforeUnload, onResize, queue, renderer, stage, update;
+    var ball_folder, black, blurHandler, body, canvas, clear, clickHandler, container, contextMenuHandler, draw, event_catcher, focusHandler, game, gui, keyDownListener, keyUpListener, main_loop, mouseDownHandler, mouseMoveHandler, mouseOutHandler, mouseUpHandler, mouseWheelHandler, onBeforeUnload, onResize, paddle_folder, queue, renderer, stage, update;
 
     body = $('body');
     container = $('<div>');
@@ -1534,6 +1530,17 @@
     container.append(renderer.view);
     canvas = $('canvas')[0];
     game = new Game(stage);
+    gui = new dat.GUI();
+    paddle_folder = gui.addFolder('Paddle');
+    paddle_folder.add(settings.PADDLE, 'MOVE_FORCE');
+    paddle_folder.add(settings.PADDLE, 'MAX_VEL');
+    paddle_folder.add(settings.PADDLE, 'ANGLE');
+    paddle_folder.add(settings.PADDLE, 'DAMPING_MOVE');
+    paddle_folder.add(settings.PADDLE, 'DAMPING_STILL');
+    ball_folder = gui.addFolder('Ball');
+    ball_folder.add(settings.BALL, 'MIN_X_VEL');
+    ball_folder.add(settings.BALL, 'MAX_ANGLE');
+    ball_folder.add(settings.BALL, 'MAGNUS_FORCE');
     onResize = function() {
       return log_input("resize");
     };

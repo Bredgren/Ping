@@ -2,14 +2,6 @@
 #_require ./settings
 
 class Paddle
-  LENGTH: 75
-  WIDTH: 10
-  FORCE: 200
-  MAX_VEL: 100
-  ANGLE: 20
-  DAMPING_MOVE: 0
-  DAMPING_STILL: 5
-
   buttons: null
 
   constructor: (@game, x, start_y=settings.HEIGHT/2) ->
@@ -21,23 +13,24 @@ class Paddle
 
     g = new PIXI.Graphics()
     g.lineStyle(2, 0xFFFFFF)
-    g.drawRect(0, 0, @WIDTH, @LENGTH)
+    g.drawRect(0, 0, settings.PADDLE.WIDTH, settings.PADDLE.LENGTH)
     t = g.generateTexture()
     @sprite = new PIXI.Sprite(t)
     @sprite.anchor.x = 0.5
     @sprite.anchor.y = 0.5
     @game.game_stage.addChild(@sprite)
 
-    b2_width = @WIDTH / settings.PPM
-    b2_length = @LENGTH / settings.PPM
+    b2_width = settings.PADDLE.WIDTH / settings.PPM
+    b2_length = settings.PADDLE.LENGTH / settings.PPM  #
     b2_x = x / settings.PPM
-    b2_y = start_y / settings.PPM
+    b2_y = start_y / settings.PPM  #
 
     bodyDef = new b2Dynamics.b2BodyDef()
     bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody
     bodyDef.position.x = b2_x
     bodyDef.position.y = b2_y
     bodyDef.fixedRotation = true
+    bodyDef.bullet = true
 
     fixDef = new b2Dynamics.b2FixtureDef()
     fixDef.density = 1.0
@@ -105,27 +98,27 @@ class Paddle
         dir = new b2Vec2(0, 1)
 
     if @buttons.up or @buttons.down
-      body.SetLinearDamping(@DAMPING_MOVE)
+      body.SetLinearDamping(settings.PADDLE.DAMPING_MOVE)
     else
-      body.SetLinearDamping(@DAMPING_STILL)
+      body.SetLinearDamping(settings.PADDLE.DAMPING_STILL)
 
-    dir.Multiply(@FORCE)
+    dir.Multiply(settings.PADDLE.MOVE_FORCE)
     body.ApplyForce(dir, pos)
 
-    if (Math.abs(vel.x) > @MAX_VEL)
-      vel.x = (if vel.x > 0 then 1 else -1) * @MAX_VEL
+    if (Math.abs(vel.x) > settings.PADDLE.MAX_VEL)
+      vel.x = (if vel.x > 0 then 1 else -1) * settings.PADDLE.MAX_VEL
       body.SetLinearVelocity(vel)
 
-    if (Math.abs(vel.y) > @MAX_VEL)
-      vel.y = (if vel.y > 0 then 1 else -1) * @MAX_VEL
+    if (Math.abs(vel.y) > settings.PADDLE.MAX_VEL)
+      vel.y = (if vel.y > 0 then 1 else -1) * settings.PADDLE.MAX_VEL
       body.SetLinearVelocity(vel)
 
     # Rotation
     if @buttons.left isnt @buttons.right
       if @buttons.left
-        body.SetAngle(-Math.PI / 180 * @ANGLE)
+        body.SetAngle(-Math.PI / 180 * settings.PADDLE.ANGLE)
       else if @buttons.right
-        body.SetAngle(Math.PI / 180 * @ANGLE)
+        body.SetAngle(Math.PI / 180 * settings.PADDLE.ANGLE)
 
     if not @buttons.left and not @buttons.right
       body.SetAngle(0)

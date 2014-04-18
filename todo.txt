@@ -6,17 +6,12 @@
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
     - parameters:
-        - screen size
+        - screen size ?
         - paddle 
-            - size
-            - location
-            - acceleration/deceleration
-            - max speed
+            - size ?
+            - location ?
         - ball
-            - min speed
-            - max angle
-            - initial speed/direction
-            - magnus force
+            - initial speed/direction ?
 
 - add more balls and menu for choosing
 - improve AI
@@ -26,6 +21,7 @@
     - highest score in a single match for each AI
 - display stats
 - add ability to unlock balls
+    - once all balls are unlocked, also unlock settings
 - prevent ball from getting stuck behind paddles (contact listener?)
 - sudden death on tie?
 - sound effect options

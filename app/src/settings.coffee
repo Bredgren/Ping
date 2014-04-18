@@ -26,7 +26,21 @@ settings = {
       ID: "End buzzer"
       SRC: "end_buzzer.ogg"
 
-  PADDLE_X: 20  # pixels from the edge
+  PADDLE:
+    X: 20  # pixels from the edge
+    LENGTH: 75
+    WIDTH: 10
+    MOVE_FORCE: 200
+    MAX_VEL: 100
+    ANGLE: 20
+    DAMPING_MOVE: 0
+    DAMPING_STILL: 10
+
+  BALL:
+    SIZE: 15
+    MIN_X_VEL: 20
+    MAX_ANGLE: 60
+    MAGNUS_FORCE: .05
 
   PPM: 30  # pixels per meter
   BOX2D_TIME_STEP: 1 / 60
