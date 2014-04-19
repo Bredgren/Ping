@@ -1,5 +1,5 @@
 
-#_require ./circle_ball
+#_require ./ball
 #_require ./debug_draw
 #_require ./normal_ai
 #_require ./paddle
@@ -23,6 +23,9 @@ class Game
   right_score: 0
 
   play_sfx: true
+
+  ball_type: 0
+  balls: []
 
   _fade_time: 1
   _start_time: 1
@@ -460,7 +463,78 @@ class Game
     @_normal_ai = new NormalAI(@)
     #@_hard_ai = new HardAI(@)
 
+    # Circle Ball
+    g = new PIXI.Graphics()
+    g.lineStyle(2, 0xFFFFFF)
+    g.drawCircle(0, 0, settings.BALL.SIZE)
+    g.moveTo(0, 0)
+    g.lineTo(settings.BALL.SIZE, 0)
+    t = g.generateTexture()
+    sprite = new PIXI.Sprite(t)
+    sprite.anchor.x = 0.5
+    sprite.anchor.y = 0.5
+    fix_def = new b2Dynamics.b2FixtureDef()
+    fix_def.density = 0.1
+    fix_def.friction = 0.5
+    fix_def.restitution = 1
+    b2_radius = settings.BALL.SIZE / settings.PPM  #
+    fix_def.shape = new b2Shapes.b2CircleShape(b2_radius)
+
+    # Circle Ball
+    @balls.push(new Ball(@, sprite, fix_def))
+    # Octagon Ball
+    @balls.push(@_makePolygonBall(8))
+    # Heptagon Ball
+    @balls.push(@_makePolygonBall(7))
+    # Hexagon Ball
+    @balls.push(@_makePolygonBall(6))
+    # Pentagon Ball
+    @balls.push(@_makePolygonBall(5))
+    # Square Ball
+    @balls.push(@_makePolygonBall(4))
+    # Triangle Ball
+    @balls.push(@_makePolygonBall(3))
+
     @gotoMenu()
+
+  _makePolygonBall: (sides) ->
+    b2_size = settings.BALL.SIZE / settings.PPM  #
+    poly = @_getPolygon(sides, b2_size)
+    g = new PIXI.Graphics()
+    @_drawPolygon(poly, g)
+    t = g.generateTexture()
+    sprite = new PIXI.Sprite(t)
+    sprite.anchor.x = 0.5
+    sprite.anchor.y = 0.5
+    fix_def = new b2Dynamics.b2FixtureDef()
+    fix_def.density = 0.1
+    fix_def.friction = 0.5
+    fix_def.restitution = 1
+    fix_def.shape = new b2Shapes.b2PolygonShape.AsArray(poly, sides)
+
+    return new Ball(@, sprite, fix_def)
+
+  _getPolygon: (sides, radius) ->
+    TAU = 2 * Math.PI
+    step_size = TAU / sides
+    v = []
+    angle = 0
+    while angle < TAU
+      x = radius * Math.cos(angle)
+      y = radius * Math.sin(angle)
+      v.push({x: x, y: y})
+      angle += step_size
+    return v
+
+  _drawPolygon: (poly, g) ->
+    g.lineStyle(2, 0xFFFFFF)
+    v0 = poly[0]
+    g.moveTo(v0.x * settings.PPM, v0.y * settings.PPM)
+    for v in poly[1...]
+      g.lineTo(v.x * settings.PPM, v.y * settings.PPM)
+    g.lineTo(v0.x * settings.PPM, v0.y * settings.PPM)
+    g.moveTo(0, 0)
+    g.lineTo(poly[0].x * settings.PPM, poly[0].y * settings.PPM)
 
   update: () ->
     t = (new Date()).getTime()
@@ -585,7 +659,8 @@ class Game
     @right_paddle = new Paddle(@, settings.WIDTH - settings.PADDLE.X)
     center = {x: settings.WIDTH / 2, y: settings.HEIGHT / 2}
     vel = {x: -50, y: 0}
-    @ball = new CircleBall(@, center, vel)
+    @ball = @balls[@ball_type]
+    @ball.init(center, vel)
 
     @time = @time_limit
     @left_score = 0

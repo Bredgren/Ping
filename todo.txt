@@ -1,7 +1,6 @@
 (lower volume)
 
-- look into firefox display issues
-- consider trying to make it work in IE
+- add menu for choosing balls
 
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
@@ -12,19 +11,24 @@
             - location ?
         - ball
             - initial speed/direction ?
-
-- add more balls and menu for choosing
-- improve AI
+            
+- improve AI and add hard AI
 - save stats
     - wins/losses/ties
     - total points scored against each AI
     - highest score in a single match for each AI
 - display stats
 - add ability to unlock balls
-    - once all balls are unlocked, also unlock settings
+    - once all balls are unlocked, also unlock settings gui
 - prevent ball from getting stuck behind paddles (contact listener?)
+- make it so you can't score on yourself at all?
+- irregular balls?
+
+- look into firefox display issues
+- consider trying to make it work in IE
+
 - sudden death on tie?
 - sound effect options
     - volume
 
-- fine-tune controls again
+- fine-tune controls again?

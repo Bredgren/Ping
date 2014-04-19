@@ -1,42 +1,36 @@
 
-class CircleBall
+class Ball
   # pos and vel in pixels
-  constructor: (@game, init_pos, init_vel) ->
-    g = new PIXI.Graphics()
-    g.lineStyle(2, 0xFFFFFF)
-    g.drawCircle(0, 0, settings.BALL.SIZE)
-    g.moveTo(0, 0)
-    g.lineTo(0, settings.BALL.SIZE)
-    t = g.generateTexture()
-    @sprite = new PIXI.Sprite(t)
-    @sprite.anchor.x = 0.5
-    @sprite.anchor.y = 0.5
-    @game.game_stage.addChild(@sprite)
+  constructor: (@game, @sprite, @fix_def) ->
+    @body_def = new b2Dynamics.b2BodyDef()
+    @body_def.type = b2Dynamics.b2Body.b2_dynamicBody
+    @body_def.bullet = true
 
-    b2_radius = settings.BALL.SIZE / settings.PPM  #
-    b2_x = init_pos.x / settings.PPM  #
-    b2_y = init_pos.y / settings.PPM  #
-
-    bodyDef = new b2Dynamics.b2BodyDef()
-    bodyDef.type = b2Dynamics.b2Body.b2_dynamicBody
-    bodyDef.position.x = b2_x
-    bodyDef.position.y = b2_y
-    bodyDef.bullet = true
-
-    fixDef = new b2Dynamics.b2FixtureDef()
-    fixDef.density = 0.1
-    fixDef.friction = 0.5
-    fixDef.restitution = 1
-    fixDef.shape = new b2Shapes.b2CircleShape(b2_radius)
-
-    @body = @game.world.CreateBody(bodyDef)
-    @body.CreateFixture(fixDef)
+  init: (pos, vel) ->
+    @body = @game.world.CreateBody(@body_def)
+    @body.CreateFixture(@fix_def)
     f = @body.GetFixtureList().GetFilterData()
     f.categoryBits = settings.COLLISION_CATEGORY.BALL
     @body.GetFixtureList().SetFilterData(f)
 
-    vel = new b2Vec2(init_vel.x / settings.PPM, init_vel.y / settings.PPM)
+    b2_x = pos.x / settings.PPM  #
+    b2_y = pos.y / settings.PPM  #
+    pos = new b2Vec2(b2_x, b2_y)
+    @body.SetPosition(pos)
+
+    vel = new b2Vec2(vel.x / settings.PPM, vel.y / settings.PPM)
     @body.SetLinearVelocity(vel)
+
+    @game.game_stage.addChild(@sprite)
+
+  destroy: () ->
+    body = @game.world.GetBodyList()
+    while body
+      if body is @body
+        @game.world.DestroyBody(body)
+      body = body.GetNext()
+    @game.game_stage.removeChild(@sprite)
+
 
   update: () ->
     vel = @body.GetLinearVelocity()
@@ -91,11 +85,3 @@ class CircleBall
 
   angularVelocity: () ->
     return @body.GetAngularVelocity()
-
-  destroy: () ->
-    body = @game.world.GetBodyList()
-    while body
-      if body is @body
-        @game.world.DestroyBody(body)
-      body = body.GetNext()
-    @game.game_stage.removeChild(@sprite)
