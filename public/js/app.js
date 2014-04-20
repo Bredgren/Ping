@@ -1468,7 +1468,7 @@
     };
 
     Game.prototype.gotoMenu = function() {
-      var l, t, w, _ref, _ref1, _ref2, _ref3, _ref4;
+      var cx, cy, l, t, w, _ref, _ref1, _ref2, _ref3, _ref4;
 
       this.state = this.states.MENU;
       this.hud_stage.addChild(this.begin_text);
@@ -1476,9 +1476,15 @@
       this.hud_stage.addChild(this.player1_text);
       this.hud_stage.addChild(this.player2_text);
       this.hud_stage.addChild(this.controls1);
+      cx = settings.WIDTH / 2;
+      cy = settings.HEIGHT / 2;
+      this.controls1.position.x = Math.round(cx / 4 - this.controls1.width / 2);
+      this.controls1.position.y = Math.round(cy * 0.65 - this.controls1.height / 2);
       if (this._player2_type === "human") {
         this.hud_stage.addChild(this.controls2);
+        this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6 - this.controls2.width / 2);
       }
+      this.controls2.position.y = Math.round(cy * 0.65);
       this.hud_stage.addChild(this.human_box);
       this.hud_stage.addChild(this.ai_norm_box);
       this.hud_stage.addChild(this.ai_hard_box);

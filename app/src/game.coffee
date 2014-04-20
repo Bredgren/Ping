@@ -831,8 +831,15 @@ class Game
     @hud_stage.addChild(@player1_text)
     @hud_stage.addChild(@player2_text)
     @hud_stage.addChild(@controls1)
+    cx = settings.WIDTH / 2
+    cy = settings.HEIGHT / 2
+    @controls1.position.x = Math.round(cx / 4 - @controls1.width / 2)
+    @controls1.position.y = Math.round(cy * 0.65 - @controls1.height / 2)
     if @_player2_type is "human"
       @hud_stage.addChild(@controls2)
+      @controls2.position.x =
+        Math.round(settings.WIDTH - cx * 0.6 - @controls2.width / 2)
+    @controls2.position.y = Math.round(cy * 0.65)
     @hud_stage.addChild(@human_box)
     @hud_stage.addChild(@ai_norm_box)
     @hud_stage.addChild(@ai_hard_box)
