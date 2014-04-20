@@ -4,9 +4,32 @@ canvas {
     background-color: black;
 }
 
+#button {
+    width: 101px;
+    margin: 30px auto;
+}
+
+a#source-button {
+    padding: 5px 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    text-decoration: none;
+    color: black;
+    background-color: #aaa;
+}
+
+a#source-button:hover {
+    background-color: #888;
+}
+
+a#source-button:visited {
+    color: black;
+}
+
 #feedback {
     width: 700px;
     margin: 20px auto;
+    padding: 10px;
     border: 1px solid black;
     border-radius: 5px;
 }
