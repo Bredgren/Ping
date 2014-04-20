@@ -29,13 +29,17 @@ H = settings.HEIGHT
 
 # The main method for the game
 main = ->
-  body = $('body')
+  game_div = $('#game')
 
   container = $('<div>')
   container.css('margin-right', 'auto')
   container.css('margin-left', 'auto')
   container.css('width', "#{W}px")
-  body.append(container)
+  container.css('height', "#{H}px")
+  game_div.append(container)
+  game_div.css('width', "#{W}px")
+  game_div.css('height', "#{H}px")
+  game_div.css('margin', "auto")
 
   black = 0x000000
   stage = new PIXI.Stage(black)
@@ -69,6 +73,8 @@ main = ->
   keyDownListener = (e) ->
     log_input("key down:", e.keyCode)
     game.onKeyDown(e.keyCode)
+    if e.keyCode is 32
+      e.preventDefault()
 
   keyUpListener = (e) ->
     log_input("key up:", e.keyCode)
@@ -132,6 +138,8 @@ main = ->
   window.onresize = onResize
   document.body.addEventListener('keydown', keyDownListener, false)
   document.body.addEventListener('keyup', keyUpListener, false)
+  # event_catcher.addEventListener('keydown', keyDownListener, false)
+  # event_catcher.addEventListener('keyup', keyUpListener, false)
   window.onbeforeunload = onBeforeUnload
   event_catcher.addEventListener('mousemove', mouseMoveHandler, false)
   event_catcher.addEventListener('click', clickHandler, false)

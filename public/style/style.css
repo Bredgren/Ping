@@ -4,6 +4,30 @@ canvas {
     background-color: black;
 }
 
+#feedback {
+    width: 700px;
+    margin: 20px auto;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+#feedback > h1 {
+    text-align: center;
+    text-decoration: underline;
+}
+
+#feedback > h2 {
+    margin-left: 10px;
+}
+
+#feedback > p {
+    margin: 10px;
+}
+
+#feedback ul {
+    margin-left: 40px;
+}
+
 /* #game-frame { */
 /*     margin: auto; */
 /*     width: 800px; */

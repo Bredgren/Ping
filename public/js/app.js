@@ -1587,14 +1587,18 @@
   H = settings.HEIGHT;
 
   main = function() {
-    var ball_folder, black, blurHandler, body, canvas, clear, clickHandler, container, contextMenuHandler, draw, event_catcher, focusHandler, game, gui, keyDownListener, keyUpListener, main_loop, mouseDownHandler, mouseMoveHandler, mouseOutHandler, mouseUpHandler, mouseWheelHandler, onBeforeUnload, onResize, paddle_folder, queue, renderer, stage, update;
+    var ball_folder, black, blurHandler, canvas, clear, clickHandler, container, contextMenuHandler, draw, event_catcher, focusHandler, game, game_div, gui, keyDownListener, keyUpListener, main_loop, mouseDownHandler, mouseMoveHandler, mouseOutHandler, mouseUpHandler, mouseWheelHandler, onBeforeUnload, onResize, paddle_folder, queue, renderer, stage, update;
 
-    body = $('body');
+    game_div = $('#game');
     container = $('<div>');
     container.css('margin-right', 'auto');
     container.css('margin-left', 'auto');
     container.css('width', "" + W + "px");
-    body.append(container);
+    container.css('height', "" + H + "px");
+    game_div.append(container);
+    game_div.css('width', "" + W + "px");
+    game_div.css('height', "" + H + "px");
+    game_div.css('margin', "auto");
     black = 0x000000;
     stage = new PIXI.Stage(black);
     renderer = PIXI.autoDetectRenderer(W, H);
@@ -1618,7 +1622,10 @@
     };
     keyDownListener = function(e) {
       log_input("key down:", e.keyCode);
-      return game.onKeyDown(e.keyCode);
+      game.onKeyDown(e.keyCode);
+      if (e.keyCode === 32) {
+        return e.preventDefault();
+      }
     };
     keyUpListener = function(e) {
       log_input("key up:", e.keyCode);
