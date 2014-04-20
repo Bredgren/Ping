@@ -960,8 +960,8 @@
         fill: "#000000"
       };
       t = new PIXI.Text("SFX: ON", style);
-      t.position.x = w / 2 - t.width / 2;
-      t.position.y = h / 2 - t.height / 2;
+      t.position.x = Math.round(w / 2 - t.width / 2);
+      t.position.y = Math.round(h / 2 - t.height / 2);
       c.addChild(t);
       rt.render(c);
       sfx_on = rt;
@@ -976,8 +976,8 @@
         fill: "#FFFFFF"
       };
       t = new PIXI.Text("SFX: ON", style);
-      t.position.x = w / 2 - t.width / 2;
-      t.position.y = h / 2 - t.height / 2;
+      t.position.x = Math.round(w / 2 - t.width / 2);
+      t.position.y = Math.round(h / 2 - t.height / 2);
       c.addChild(t);
       rt.render(c);
       sfx_on_hover = rt;
@@ -992,8 +992,8 @@
         fill: "#FFFFFF"
       };
       t = new PIXI.Text("SFX: OFF", style);
-      t.position.x = w / 2 - t.width / 2;
-      t.position.y = h / 2 - t.height / 2;
+      t.position.x = Math.round(w / 2 - t.width / 2);
+      t.position.y = Math.round(h / 2 - t.height / 2);
       c.addChild(t);
       rt.render(c);
       sfx_off = rt;
@@ -1009,8 +1009,8 @@
         fill: "#000000"
       };
       t = new PIXI.Text("SFX: OFF", style);
-      t.position.x = w / 2 - t.width / 2;
-      t.position.y = h / 2 - t.height / 2;
+      t.position.x = Math.round(w / 2 - t.width / 2);
+      t.position.y = Math.round(h / 2 - t.height / 2);
       c.addChild(t);
       rt.render(c);
       sfx_off_hover = rt;

@@ -10,11 +10,6 @@
         - ball
             - initial speed/direction ?
             
-- save stats
-    - wins/losses/ties
-    - total points scored against each AI
-    - highest score in a single match for each AI
-- display stats
 - improve AI and add hard AI
 - add menu for choosing balls
 - add ability to unlock balls
