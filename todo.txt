@@ -1,7 +1,5 @@
 (lower volume)
 
-- add menu for choosing balls
-
 - fine-tune controls
     - add dat.GUI controls and let testers play with them
     - parameters:
@@ -12,12 +10,13 @@
         - ball
             - initial speed/direction ?
             
-- improve AI and add hard AI
 - save stats
     - wins/losses/ties
     - total points scored against each AI
     - highest score in a single match for each AI
 - display stats
+- improve AI and add hard AI
+- add menu for choosing balls
 - add ability to unlock balls
     - once all balls are unlocked, also unlock settings gui
 - prevent ball from getting stuck behind paddles (contact listener?)

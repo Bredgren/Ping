@@ -73,7 +73,7 @@ main = ->
   keyDownListener = (e) ->
     log_input("key down:", e.keyCode)
     game.onKeyDown(e.keyCode)
-    if e.keyCode is 32
+    if e.keyCode is 32 or 37 <= e.keyCode <= 40
       e.preventDefault()
 
   keyUpListener = (e) ->

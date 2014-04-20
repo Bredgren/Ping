@@ -63,6 +63,84 @@ class Game
     @title_text.position.x = cx - @title_text.width / 2
     @title_text.position.y = cy / 3
 
+    stat_y = Math.round(settings.HEIGHT * .65)
+    padding = 15
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    @h_stat_text = new PIXI.Text("Human", style)
+    @h_stat_text.position.x = Math.round(.25 * cx + cx - @h_stat_text.width / 2)
+    @h_stat_text.position.y = stat_y
+
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    @nai_stat_text = new PIXI.Text("Normal AI", style)
+    @nai_stat_text.position.x = Math.round(.5*cx+cx - @nai_stat_text.width / 2)
+    @nai_stat_text.position.y = stat_y
+
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    @hai_stat_text = new PIXI.Text("Hard AI", style)
+    @hai_stat_text.position.x = Math.round(.75*cx+cx - @hai_stat_text.width / 2)
+    @hai_stat_text.position.y = stat_y
+
+    style = {font: "10px Arial", fill: "#FFFFFF"}
+    @h_wins_text = new PIXI.Text("Wins:", style)
+    @h_wins_text.position.x = @h_stat_text.position.x
+    @h_wins_text.position.y = @h_stat_text.position.y + padding + 5
+
+    @h_losses_text = new PIXI.Text("Loses:", style)
+    @h_losses_text.position.x = @h_stat_text.position.x
+    @h_losses_text.position.y = @h_wins_text.position.y + padding
+
+    @h_ties_text = new PIXI.Text("Ties:", style)
+    @h_ties_text.position.x = @h_stat_text.position.x
+    @h_ties_text.position.y = @h_losses_text.position.y + padding
+
+    @h_best_text = new PIXI.Text("Best:", style)
+    @h_best_text.position.x = @h_stat_text.position.x
+    @h_best_text.position.y = @h_ties_text.position.y + padding
+
+    @h_total1_text = new PIXI.Text("Total:", style)
+    @h_total1_text.position.x = @h_stat_text.position.x
+    @h_total1_text.position.y = @h_best_text.position.y + padding
+
+    @nai_wins_text = new PIXI.Text("Wins:", style)
+    @nai_wins_text.position.x = @nai_stat_text.position.x
+    @nai_wins_text.position.y = @nai_stat_text.position.y + padding + 5
+
+    @nai_losses_text = new PIXI.Text("Loses:", style)
+    @nai_losses_text.position.x = @nai_stat_text.position.x
+    @nai_losses_text.position.y = @nai_wins_text.position.y + padding
+
+    @nai_ties_text = new PIXI.Text("Ties:", style)
+    @nai_ties_text.position.x = @nai_stat_text.position.x
+    @nai_ties_text.position.y = @nai_losses_text.position.y + padding
+
+    @nai_best_text = new PIXI.Text("Best:", style)
+    @nai_best_text.position.x = @nai_stat_text.position.x
+    @nai_best_text.position.y = @nai_ties_text.position.y + padding
+
+    @nai_total1_text = new PIXI.Text("Total:", style)
+    @nai_total1_text.position.x = @nai_stat_text.position.x
+    @nai_total1_text.position.y = @nai_best_text.position.y + padding
+
+    @hai_wins_text = new PIXI.Text("Wins:", style)
+    @hai_wins_text.position.x = @hai_stat_text.position.x
+    @hai_wins_text.position.y = @hai_stat_text.position.y + padding + 5
+
+    @hai_losses_text = new PIXI.Text("Loses:", style)
+    @hai_losses_text.position.x = @hai_stat_text.position.x
+    @hai_losses_text.position.y = @hai_wins_text.position.y + padding
+
+    @hai_ties_text = new PIXI.Text("Ties:", style)
+    @hai_ties_text.position.x = @hai_stat_text.position.x
+    @hai_ties_text.position.y = @hai_losses_text.position.y + padding
+
+    @hai_best_text = new PIXI.Text("Best:", style)
+    @hai_best_text.position.x = @hai_stat_text.position.x
+    @hai_best_text.position.y = @hai_ties_text.position.y + padding
+
+    @hai_total1_text = new PIXI.Text("Total:", style)
+    @hai_total1_text.position.x = @hai_stat_text.position.x
+    @hai_total1_text.position.y = @hai_best_text.position.y + padding
+
     style = {font: "50px Arial", fill: "#FFFFFF"}
     @victor_text = new PIXI.Text("Player 1 Wins!", style)
     @victor_text.position.x = cx - @victor_text.width / 2
@@ -641,6 +719,28 @@ class Game
     @hud_stage.removeChild(@player1_text)
     @hud_stage.removeChild(@player2_text)
     @hud_stage.removeChild(@controls1)
+
+    @hud_stage.removeChild(@h_stat_text)
+    @hud_stage.removeChild(@h_wins_text)
+    @hud_stage.removeChild(@h_losses_text)
+    @hud_stage.removeChild(@h_ties_text)
+    @hud_stage.removeChild(@h_best_text)
+    @hud_stage.removeChild(@h_total1_text)
+
+    @hud_stage.removeChild(@nai_stat_text)
+    @hud_stage.removeChild(@nai_wins_text)
+    @hud_stage.removeChild(@nai_losses_text)
+    @hud_stage.removeChild(@nai_ties_text)
+    @hud_stage.removeChild(@nai_best_text)
+    @hud_stage.removeChild(@nai_total1_text)
+
+    @hud_stage.removeChild(@hai_stat_text)
+    @hud_stage.removeChild(@hai_wins_text)
+    @hud_stage.removeChild(@hai_losses_text)
+    @hud_stage.removeChild(@hai_ties_text)
+    @hud_stage.removeChild(@hai_best_text)
+    @hud_stage.removeChild(@hai_total1_text)
+
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
     if @human_box in @hud_stage.children
@@ -690,18 +790,35 @@ class Game
 
     @_start_time = @_fade_time
 
-  endGame: () ->
+  endGame: (quit=false) ->
     @state = @states.END
     @hud_stage.removeChild(@quit_text)
     if @countdown_text in @hud_stage.children
       @hud_stage.removeChild(@countdown_text)
     @hud_stage.addChild(@return_text)
-    if @left_score > @right_score
+    key = @_player2_type
+    if quit
+      @victor_text.setText("  No one wins!")
+      key += " quits"
+    else if @left_score > @right_score
       @victor_text.setText("Player 1 Wins!")
+      key += " wins"
     else if @left_score < @right_score
       @victor_text.setText("Player 2 Wins!")
+      key += " losses"
     else
       @victor_text.setText("Player 3 Wins?!")
+      key += " ties"
+    @_incSaveItem(key)
+    if not quit
+      key = @_player2_type + " total 1"
+      @_incSaveItem(key, @left_score)
+      key = @_player2_type + " total 2"
+      @_incSaveItem(key, @right_score)
+      key = @_player2_type + " best"
+      best = @_getSaveItemInt(key)
+      if @left_score > best
+        @_setSaveItem(key, @left_score)
     @hud_stage.addChild(@victor_text)
     @left_paddle.destroy()
     @right_paddle.destroy()
@@ -720,6 +837,72 @@ class Game
     @hud_stage.addChild(@ai_norm_box)
     @hud_stage.addChild(@ai_hard_box)
     @hud_stage.addChild(@sfx_box)
+
+    @hud_stage.addChild(@h_stat_text)
+
+    w = @_getSaveItemInt("human wins")
+    @h_wins_text.setText("Wins: #{w}")
+    @hud_stage.addChild(@h_wins_text)
+
+    l = @_getSaveItemInt("human losses")
+    @h_losses_text.setText("Losses: #{l}")
+    @hud_stage.addChild(@h_losses_text)
+
+    t = @_getSaveItemInt("human ties")
+    @h_ties_text.setText("Ties: #{t}")
+    @hud_stage.addChild(@h_ties_text)
+
+    t = @_getSaveItemInt("human best")
+    @h_best_text.setText("Best: #{t}")
+    @hud_stage.addChild(@h_best_text)
+
+    t = @_getSaveItemInt("human total 1")
+    @h_total1_text.setText("Total: #{t}")
+    @hud_stage.addChild(@h_total1_text)
+
+    @hud_stage.addChild(@nai_stat_text)
+
+    w = @_getSaveItemInt("normal ai wins")
+    @nai_wins_text.setText("Wins: #{w}")
+    @hud_stage.addChild(@nai_wins_text)
+
+    l = @_getSaveItemInt("normal ai losses")
+    @nai_losses_text.setText("Losses: #{l}")
+    @hud_stage.addChild(@nai_losses_text)
+
+    t = @_getSaveItemInt("normal ai ties")
+    @nai_ties_text.setText("Ties: #{t}")
+    @hud_stage.addChild(@nai_ties_text)
+
+    t = @_getSaveItemInt("normal ai best")
+    @nai_best_text.setText("Best: #{t}")
+    @hud_stage.addChild(@nai_best_text)
+
+    t = @_getSaveItemInt("normal ai total 1")
+    @nai_total1_text.setText("Total: #{t}")
+    @hud_stage.addChild(@nai_total1_text)
+
+    @hud_stage.addChild(@hai_stat_text)
+
+    w = @_getSaveItemInt("hard ai wins")
+    @hai_wins_text.setText("Wins: #{w}")
+    @hud_stage.addChild(@hai_wins_text)
+
+    l = @_getSaveItemInt("hard ai losses")
+    @hai_losses_text.setText("Losses: #{l}")
+    @hud_stage.addChild(@hai_losses_text)
+
+    t = @_getSaveItemInt("hard ai ties")
+    @hai_ties_text.setText("Ties: #{t}")
+    @hud_stage.addChild(@hai_ties_text)
+
+    t = @_getSaveItemInt("hard ai best")
+    @hai_best_text.setText("Best: #{t}")
+    @hud_stage.addChild(@hai_best_text)
+
+    t = @_getSaveItemInt("hard ai total 1")
+    @hai_total1_text.setText("Total: #{t}")
+    @hud_stage.addChild(@hai_total1_text)
 
     if @return_text in @hud_stage.children
       @hud_stage.removeChild(@return_text)
@@ -768,7 +951,7 @@ class Game
 
     if key_code is bindings.END and
        (@state is @states.GAME or @state is @states.COUNT_DOWN)
-      @endGame()
+      @endGame(true)
 
   onKeyUp: (key_code) ->
     if @state isnt @states.GAME then return
@@ -809,11 +992,13 @@ class Game
 
   _onSelectNormAI: () ->
     @_player2_type = "normal ai"
-    @hud_stage.removeChild(@controls2)
+    if @controls2 in @hud_stage.children
+      @hud_stage.removeChild(@controls2)
 
   _onSelectHardAI: () ->
     @_player2_type = "hard ai"
-    @hud_stage.removeChild(@controls2)
+    if @controls2 in @hud_stage.children
+      @hud_stage.removeChild(@controls2)
 
   _checkContacts: () ->
     contact = @world.GetContactList()
@@ -867,3 +1052,18 @@ class Game
   _playSound: (id) ->
     if @play_sfx
       createjs.Sound.play(id)
+
+  _incSaveItem: (key, amount=1) ->
+    prev = localStorage[key]
+    if not prev
+      prev = "0"
+    localStorage[key] = parseInt(prev) + amount
+
+  _setSaveItem: (key, val) ->
+    localStorage[key] = val
+
+  _getSaveItemInt: (key) ->
+    val = localStorage[key]
+    if not val
+      val = "0"
+    return parseInt(val)

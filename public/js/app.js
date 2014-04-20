@@ -629,7 +629,7 @@
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, offset, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, sprite, style, t, w, x, y, _i,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, offset, padding, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, sprite, stat_y, style, t, w, x, y, _i,
         _this = this;
 
       this.stage = stage;
@@ -650,6 +650,78 @@
       this.title_text = new PIXI.Text("Ping", style);
       this.title_text.position.x = cx - this.title_text.width / 2;
       this.title_text.position.y = cy / 3;
+      stat_y = Math.round(settings.HEIGHT * .65);
+      padding = 15;
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      this.h_stat_text = new PIXI.Text("Human", style);
+      this.h_stat_text.position.x = Math.round(.25 * cx + cx - this.h_stat_text.width / 2);
+      this.h_stat_text.position.y = stat_y;
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      this.nai_stat_text = new PIXI.Text("Normal AI", style);
+      this.nai_stat_text.position.x = Math.round(.5 * cx + cx - this.nai_stat_text.width / 2);
+      this.nai_stat_text.position.y = stat_y;
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      this.hai_stat_text = new PIXI.Text("Hard AI", style);
+      this.hai_stat_text.position.x = Math.round(.75 * cx + cx - this.hai_stat_text.width / 2);
+      this.hai_stat_text.position.y = stat_y;
+      style = {
+        font: "10px Arial",
+        fill: "#FFFFFF"
+      };
+      this.h_wins_text = new PIXI.Text("Wins:", style);
+      this.h_wins_text.position.x = this.h_stat_text.position.x;
+      this.h_wins_text.position.y = this.h_stat_text.position.y + padding + 5;
+      this.h_losses_text = new PIXI.Text("Loses:", style);
+      this.h_losses_text.position.x = this.h_stat_text.position.x;
+      this.h_losses_text.position.y = this.h_wins_text.position.y + padding;
+      this.h_ties_text = new PIXI.Text("Ties:", style);
+      this.h_ties_text.position.x = this.h_stat_text.position.x;
+      this.h_ties_text.position.y = this.h_losses_text.position.y + padding;
+      this.h_best_text = new PIXI.Text("Best:", style);
+      this.h_best_text.position.x = this.h_stat_text.position.x;
+      this.h_best_text.position.y = this.h_ties_text.position.y + padding;
+      this.h_total1_text = new PIXI.Text("Total:", style);
+      this.h_total1_text.position.x = this.h_stat_text.position.x;
+      this.h_total1_text.position.y = this.h_best_text.position.y + padding;
+      this.nai_wins_text = new PIXI.Text("Wins:", style);
+      this.nai_wins_text.position.x = this.nai_stat_text.position.x;
+      this.nai_wins_text.position.y = this.nai_stat_text.position.y + padding + 5;
+      this.nai_losses_text = new PIXI.Text("Loses:", style);
+      this.nai_losses_text.position.x = this.nai_stat_text.position.x;
+      this.nai_losses_text.position.y = this.nai_wins_text.position.y + padding;
+      this.nai_ties_text = new PIXI.Text("Ties:", style);
+      this.nai_ties_text.position.x = this.nai_stat_text.position.x;
+      this.nai_ties_text.position.y = this.nai_losses_text.position.y + padding;
+      this.nai_best_text = new PIXI.Text("Best:", style);
+      this.nai_best_text.position.x = this.nai_stat_text.position.x;
+      this.nai_best_text.position.y = this.nai_ties_text.position.y + padding;
+      this.nai_total1_text = new PIXI.Text("Total:", style);
+      this.nai_total1_text.position.x = this.nai_stat_text.position.x;
+      this.nai_total1_text.position.y = this.nai_best_text.position.y + padding;
+      this.hai_wins_text = new PIXI.Text("Wins:", style);
+      this.hai_wins_text.position.x = this.hai_stat_text.position.x;
+      this.hai_wins_text.position.y = this.hai_stat_text.position.y + padding + 5;
+      this.hai_losses_text = new PIXI.Text("Loses:", style);
+      this.hai_losses_text.position.x = this.hai_stat_text.position.x;
+      this.hai_losses_text.position.y = this.hai_wins_text.position.y + padding;
+      this.hai_ties_text = new PIXI.Text("Ties:", style);
+      this.hai_ties_text.position.x = this.hai_stat_text.position.x;
+      this.hai_ties_text.position.y = this.hai_losses_text.position.y + padding;
+      this.hai_best_text = new PIXI.Text("Best:", style);
+      this.hai_best_text.position.x = this.hai_stat_text.position.x;
+      this.hai_best_text.position.y = this.hai_ties_text.position.y + padding;
+      this.hai_total1_text = new PIXI.Text("Total:", style);
+      this.hai_total1_text.position.x = this.hai_stat_text.position.x;
+      this.hai_total1_text.position.y = this.hai_best_text.position.y + padding;
       style = {
         font: "50px Arial",
         fill: "#FFFFFF"
@@ -1276,6 +1348,24 @@
       this.hud_stage.removeChild(this.player1_text);
       this.hud_stage.removeChild(this.player2_text);
       this.hud_stage.removeChild(this.controls1);
+      this.hud_stage.removeChild(this.h_stat_text);
+      this.hud_stage.removeChild(this.h_wins_text);
+      this.hud_stage.removeChild(this.h_losses_text);
+      this.hud_stage.removeChild(this.h_ties_text);
+      this.hud_stage.removeChild(this.h_best_text);
+      this.hud_stage.removeChild(this.h_total1_text);
+      this.hud_stage.removeChild(this.nai_stat_text);
+      this.hud_stage.removeChild(this.nai_wins_text);
+      this.hud_stage.removeChild(this.nai_losses_text);
+      this.hud_stage.removeChild(this.nai_ties_text);
+      this.hud_stage.removeChild(this.nai_best_text);
+      this.hud_stage.removeChild(this.nai_total1_text);
+      this.hud_stage.removeChild(this.hai_stat_text);
+      this.hud_stage.removeChild(this.hai_wins_text);
+      this.hud_stage.removeChild(this.hai_losses_text);
+      this.hud_stage.removeChild(this.hai_ties_text);
+      this.hud_stage.removeChild(this.hai_best_text);
+      this.hud_stage.removeChild(this.hai_total1_text);
       if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.controls2);
       }
@@ -1333,21 +1423,43 @@
       return this._start_time = this._fade_time;
     };
 
-    Game.prototype.endGame = function() {
-      var _ref;
+    Game.prototype.endGame = function(quit) {
+      var best, key, _ref;
 
+      if (quit == null) {
+        quit = false;
+      }
       this.state = this.states.END;
       this.hud_stage.removeChild(this.quit_text);
       if (_ref = this.countdown_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.countdown_text);
       }
       this.hud_stage.addChild(this.return_text);
-      if (this.left_score > this.right_score) {
+      key = this._player2_type;
+      if (quit) {
+        this.victor_text.setText("  No one wins!");
+        key += " quits";
+      } else if (this.left_score > this.right_score) {
         this.victor_text.setText("Player 1 Wins!");
+        key += " wins";
       } else if (this.left_score < this.right_score) {
         this.victor_text.setText("Player 2 Wins!");
+        key += " losses";
       } else {
         this.victor_text.setText("Player 3 Wins?!");
+        key += " ties";
+      }
+      this._incSaveItem(key);
+      if (!quit) {
+        key = this._player2_type + " total 1";
+        this._incSaveItem(key, this.left_score);
+        key = this._player2_type + " total 2";
+        this._incSaveItem(key, this.right_score);
+        key = this._player2_type + " best";
+        best = this._getSaveItemInt(key);
+        if (this.left_score > best) {
+          this._setSaveItem(key, this.left_score);
+        }
       }
       this.hud_stage.addChild(this.victor_text);
       this.left_paddle.destroy();
@@ -1356,7 +1468,7 @@
     };
 
     Game.prototype.gotoMenu = function() {
-      var _ref, _ref1, _ref2, _ref3, _ref4;
+      var l, t, w, _ref, _ref1, _ref2, _ref3, _ref4;
 
       this.state = this.states.MENU;
       this.hud_stage.addChild(this.begin_text);
@@ -1371,6 +1483,54 @@
       this.hud_stage.addChild(this.ai_norm_box);
       this.hud_stage.addChild(this.ai_hard_box);
       this.hud_stage.addChild(this.sfx_box);
+      this.hud_stage.addChild(this.h_stat_text);
+      w = this._getSaveItemInt("human wins");
+      this.h_wins_text.setText("Wins: " + w);
+      this.hud_stage.addChild(this.h_wins_text);
+      l = this._getSaveItemInt("human losses");
+      this.h_losses_text.setText("Losses: " + l);
+      this.hud_stage.addChild(this.h_losses_text);
+      t = this._getSaveItemInt("human ties");
+      this.h_ties_text.setText("Ties: " + t);
+      this.hud_stage.addChild(this.h_ties_text);
+      t = this._getSaveItemInt("human best");
+      this.h_best_text.setText("Best: " + t);
+      this.hud_stage.addChild(this.h_best_text);
+      t = this._getSaveItemInt("human total 1");
+      this.h_total1_text.setText("Total: " + t);
+      this.hud_stage.addChild(this.h_total1_text);
+      this.hud_stage.addChild(this.nai_stat_text);
+      w = this._getSaveItemInt("normal ai wins");
+      this.nai_wins_text.setText("Wins: " + w);
+      this.hud_stage.addChild(this.nai_wins_text);
+      l = this._getSaveItemInt("normal ai losses");
+      this.nai_losses_text.setText("Losses: " + l);
+      this.hud_stage.addChild(this.nai_losses_text);
+      t = this._getSaveItemInt("normal ai ties");
+      this.nai_ties_text.setText("Ties: " + t);
+      this.hud_stage.addChild(this.nai_ties_text);
+      t = this._getSaveItemInt("normal ai best");
+      this.nai_best_text.setText("Best: " + t);
+      this.hud_stage.addChild(this.nai_best_text);
+      t = this._getSaveItemInt("normal ai total 1");
+      this.nai_total1_text.setText("Total: " + t);
+      this.hud_stage.addChild(this.nai_total1_text);
+      this.hud_stage.addChild(this.hai_stat_text);
+      w = this._getSaveItemInt("hard ai wins");
+      this.hai_wins_text.setText("Wins: " + w);
+      this.hud_stage.addChild(this.hai_wins_text);
+      l = this._getSaveItemInt("hard ai losses");
+      this.hai_losses_text.setText("Losses: " + l);
+      this.hud_stage.addChild(this.hai_losses_text);
+      t = this._getSaveItemInt("hard ai ties");
+      this.hai_ties_text.setText("Ties: " + t);
+      this.hud_stage.addChild(this.hai_ties_text);
+      t = this._getSaveItemInt("hard ai best");
+      this.hai_best_text.setText("Best: " + t);
+      this.hud_stage.addChild(this.hai_best_text);
+      t = this._getSaveItemInt("hard ai total 1");
+      this.hai_total1_text.setText("Total: " + t);
+      this.hud_stage.addChild(this.hai_total1_text);
       if (_ref = this.return_text, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
         this.hud_stage.removeChild(this.return_text);
       }
@@ -1438,7 +1598,7 @@
         }
       }
       if (key_code === bindings.END && (this.state === this.states.GAME || this.state === this.states.COUNT_DOWN)) {
-        return this.endGame();
+        return this.endGame(true);
       }
     };
 
@@ -1494,13 +1654,21 @@
     };
 
     Game.prototype._onSelectNormAI = function() {
+      var _ref;
+
       this._player2_type = "normal ai";
-      return this.hud_stage.removeChild(this.controls2);
+      if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
+        return this.hud_stage.removeChild(this.controls2);
+      }
     };
 
     Game.prototype._onSelectHardAI = function() {
+      var _ref;
+
       this._player2_type = "hard ai";
-      return this.hud_stage.removeChild(this.controls2);
+      if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
+        return this.hud_stage.removeChild(this.controls2);
+      }
     };
 
     Game.prototype._checkContacts = function() {
@@ -1549,6 +1717,33 @@
       if (this.play_sfx) {
         return createjs.Sound.play(id);
       }
+    };
+
+    Game.prototype._incSaveItem = function(key, amount) {
+      var prev;
+
+      if (amount == null) {
+        amount = 1;
+      }
+      prev = localStorage[key];
+      if (!prev) {
+        prev = "0";
+      }
+      return localStorage[key] = parseInt(prev) + amount;
+    };
+
+    Game.prototype._setSaveItem = function(key, val) {
+      return localStorage[key] = val;
+    };
+
+    Game.prototype._getSaveItemInt = function(key) {
+      var val;
+
+      val = localStorage[key];
+      if (!val) {
+        val = "0";
+      }
+      return parseInt(val);
     };
 
     return Game;
@@ -1621,9 +1816,11 @@
       return log_input("resize");
     };
     keyDownListener = function(e) {
+      var _ref;
+
       log_input("key down:", e.keyCode);
       game.onKeyDown(e.keyCode);
-      if (e.keyCode === 32) {
+      if (e.keyCode === 32 || (37 <= (_ref = e.keyCode) && _ref <= 40)) {
         return e.preventDefault();
       }
     };
