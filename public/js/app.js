@@ -624,12 +624,14 @@
 
     Game.prototype._can_score_r = true;
 
+    Game.prototype._wasd_1 = true;
+
     Game.prototype.GRAD_TIME = 20;
 
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, offset, padding, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, sprite, stat_y, style, t, w, x, y, _i,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, offset, padding, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, sprite, stat_y, style, swap, swap_selected, t, w, x, y, _i,
         _this = this;
 
       this.stage = stage;
@@ -748,6 +750,57 @@
       this.controls2 = new PIXI.Sprite.fromImage("assets/img/arrows.png");
       this.controls2.position.x = Math.round(settings.WIDTH - cx * 0.6);
       this.controls2.position.y = Math.round(cy * 0.65);
+      w = 106;
+      h = 25;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.lineStyle(1, 0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#FFFFFF"
+      };
+      t = new PIXI.Text("Swap Controls", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      swap = rt;
+      rt = new PIXI.RenderTexture(w + 1, h + 1);
+      c = new PIXI.DisplayObjectContainer();
+      g = new PIXI.Graphics();
+      g.beginFill(0xFFFFFF);
+      g.drawRect(0, 0, w, h);
+      g.endFill();
+      c.addChild(g);
+      style = {
+        font: "15px Arial",
+        fill: "#000000"
+      };
+      t = new PIXI.Text("Swap Controls", style);
+      t.position.x = w / 2 - t.width / 2;
+      t.position.y = h / 2 - t.height / 2;
+      c.addChild(t);
+      rt.render(c);
+      swap_selected = rt;
+      this.swap_box = new PIXI.Sprite(swap);
+      this.swap_box.interactive = true;
+      this.swap_box.hitArea = new PIXI.Rectangle(0, 0, w, h);
+      this.swap_box.mouseover = function(data) {
+        return this.setTexture(swap_selected);
+      };
+      this.swap_box.mouseout = function(data) {
+        return this.setTexture(swap);
+      };
+      this.swap_box.click = function(data) {
+        return _this._swapControls();
+      };
+      x = cx / 4 - 13;
+      y = cy * 0.9;
+      this.swap_box.x = Math.round(x);
+      this.swap_box.y = Math.round(y);
       rt = new PIXI.RenderTexture(76, 26);
       c = new PIXI.DisplayObjectContainer();
       g = new PIXI.Graphics();
@@ -1348,6 +1401,7 @@
       this.hud_stage.removeChild(this.player1_text);
       this.hud_stage.removeChild(this.player2_text);
       this.hud_stage.removeChild(this.controls1);
+      this.hud_stage.removeChild(this.swap_box);
       this.hud_stage.removeChild(this.h_stat_text);
       this.hud_stage.removeChild(this.h_wins_text);
       this.hud_stage.removeChild(this.h_losses_text);
@@ -1479,6 +1533,7 @@
       if (this._player2_type === "human") {
         this.hud_stage.addChild(this.controls2);
       }
+      this.hud_stage.addChild(this.swap_box);
       this.hud_stage.addChild(this.human_box);
       this.hud_stage.addChild(this.ai_norm_box);
       this.hud_stage.addChild(this.ai_hard_box);
@@ -1556,35 +1611,59 @@
       if (this.state === this.states.GAME) {
         switch (key_code) {
           case bindings.P1_UP:
-            this.left_paddle.startUp();
-            break;
-          case bindings.P1_DOWN:
-            this.left_paddle.startDown();
-            break;
-          case bindings.P1_LEFT:
-            this.left_paddle.startLeft();
-            break;
-          case bindings.P1_RIGHT:
-            this.left_paddle.startRight();
-            break;
-          case bindings.P2_UP:
-            if (this._player2_type === "human") {
+            if (this._wasd_1) {
+              this.left_paddle.startUp();
+            } else if (this._player2_type === "human") {
               this.right_paddle.startUp();
             }
             break;
-          case bindings.P2_DOWN:
-            if (this._player2_type === "human") {
+          case bindings.P1_DOWN:
+            if (this._wasd_1) {
+              this.left_paddle.startDown();
+            } else if (this._player2_type === "human") {
               this.right_paddle.startDown();
             }
             break;
-          case bindings.P2_LEFT:
-            if (this._player2_type === "human") {
+          case bindings.P1_LEFT:
+            if (this._wasd_1) {
+              this.left_paddle.startLeft();
+            } else if (this._player2_type === "human") {
               this.right_paddle.startLeft();
             }
             break;
-          case bindings.P2_RIGHT:
-            if (this._player2_type === "human") {
+          case bindings.P1_RIGHT:
+            if (this._wasd_1) {
+              this.left_paddle.startRight();
+            } else if (this._player2_type === "human") {
               this.right_paddle.startRight();
+            }
+            break;
+          case bindings.P2_UP:
+            if (this._wasd_1 && this._player2_type === "human") {
+              this.right_paddle.startUp();
+            } else {
+              this.left_paddle.startUp();
+            }
+            break;
+          case bindings.P2_DOWN:
+            if (this._wasd_1 && this._player2_type === "human") {
+              this.right_paddle.startDown();
+            } else {
+              this.left_paddle.startDown();
+            }
+            break;
+          case bindings.P2_LEFT:
+            if (this._wasd_1 && this._player2_type === "human") {
+              this.right_paddle.startLeft();
+            } else {
+              this.left_paddle.startLeft();
+            }
+            break;
+          case bindings.P2_RIGHT:
+            if (this._wasd_1 && this._player2_type === "human") {
+              this.right_paddle.startRight();
+            } else {
+              this.left_paddle.startRight();
             }
         }
       }
@@ -1611,31 +1690,59 @@
       bindings = settings.BINDINGS;
       switch (key_code) {
         case bindings.P1_UP:
-          return this.left_paddle.endUp();
-        case bindings.P1_DOWN:
-          return this.left_paddle.endDown();
-        case bindings.P1_LEFT:
-          return this.left_paddle.endLeft();
-        case bindings.P1_RIGHT:
-          return this.left_paddle.endRight();
-        case bindings.P2_UP:
-          if (this._player2_type === "human") {
+          if (this._wasd_1) {
+            return this.left_paddle.endUp();
+          } else if (this._player2_type === "human") {
             return this.right_paddle.endUp();
           }
           break;
-        case bindings.P2_DOWN:
-          if (this._player2_type === "human") {
+        case bindings.P1_DOWN:
+          if (this._wasd_1) {
+            return this.left_paddle.endDown();
+          } else if (this._player2_type === "human") {
             return this.right_paddle.endDown();
           }
           break;
-        case bindings.P2_LEFT:
-          if (this._player2_type === "human") {
+        case bindings.P1_LEFT:
+          if (this._wasd_1) {
+            return this.left_paddle.endLeft();
+          } else if (this._player2_type === "human") {
             return this.right_paddle.endLeft();
           }
           break;
-        case bindings.P2_RIGHT:
-          if (this._player2_type === "human") {
+        case bindings.P1_RIGHT:
+          if (this._wasd_1) {
+            return this.left_paddle.endRight();
+          } else if (this._player2_type === "human") {
             return this.right_paddle.endRight();
+          }
+          break;
+        case bindings.P2_UP:
+          if (this._wasd_1 && this._player2_type === "human") {
+            return this.right_paddle.endUp();
+          } else {
+            return this.left_paddle.endUp();
+          }
+          break;
+        case bindings.P2_DOWN:
+          if (this._wasd_1 && this._player2_type === "human") {
+            return this.right_paddle.endDown();
+          } else {
+            return this.left_paddle.endDown();
+          }
+          break;
+        case bindings.P2_LEFT:
+          if (this._wasd_1 && this._player2_type === "human") {
+            return this.right_paddle.endLeft();
+          } else {
+            return this.left_paddle.endLeft();
+          }
+          break;
+        case bindings.P2_RIGHT:
+          if (this._wasd_1 && this._player2_type === "human") {
+            return this.right_paddle.endRight();
+          } else {
+            return this.left_paddle.endRight();
           }
       }
     };
@@ -1744,6 +1851,27 @@
         val = "0";
       }
       return parseInt(val);
+    };
+
+    Game.prototype._swapControls = function() {
+      var c, visible_1, visible_2, x, _ref, _ref1;
+
+      this._wasd_1 = !this._wasd_1;
+      x = this.controls1.position.x;
+      this.controls1.position.x = this.controls2.position.x;
+      this.controls2.position.x = x;
+      visible_1 = (_ref = this.controls1, __indexOf.call(this.hud_stage.children, _ref) >= 0);
+      visible_2 = (_ref1 = this.controls2, __indexOf.call(this.hud_stage.children, _ref1) >= 0);
+      if (!visible_1 && visible_2) {
+        this.hud_stage.addChild(this.controls1);
+        this.hud_stage.removeChild(this.controls2);
+      } else if (visible_1 && !visible_2) {
+        this.hud_stage.addChild(this.controls2);
+        this.hud_stage.removeChild(this.controls1);
+      }
+      c = this.controls1;
+      this.controls1 = this.controls2;
+      return this.controls2 = c;
     };
 
     return Game;

@@ -1,15 +1,7 @@
 (lower volume)
 
-- fine-tune controls
-    - add dat.GUI controls and let testers play with them
-    - parameters:
-        - screen size ?
-        - paddle 
-            - size ?
-            - location ?
-        - ball
-            - initial speed/direction ?
-            
+
+- Add menu for swapping controls    
 - improve AI and add hard AI
 - add menu for choosing balls
 - add ability to unlock balls

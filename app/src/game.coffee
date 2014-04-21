@@ -41,6 +41,8 @@ class Game
   _can_score_l: true
   _can_score_r: true
 
+  _wasd_1: true
+
   GRAD_TIME: 20
   TIME_TEXT_SIZE: 50
 
@@ -166,6 +168,53 @@ class Game
     @controls2 = new PIXI.Sprite.fromImage("assets/img/arrows.png")
     @controls2.position.x = Math.round(settings.WIDTH - cx * 0.6)
     @controls2.position.y = Math.round(cy * 0.65)
+
+    w = 106
+    h = 25
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.lineStyle(1, 0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#FFFFFF"}
+    t = new PIXI.Text("Swap Controls", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    swap = rt
+
+    rt = new PIXI.RenderTexture(w + 1, h + 1)
+    c = new PIXI.DisplayObjectContainer()
+
+    g = new PIXI.Graphics()
+    g.beginFill(0xFFFFFF)
+    g.drawRect(0, 0, w, h)
+    g.endFill()
+    c.addChild(g)
+    style = {font: "15px Arial", fill: "#000000"}
+    t = new PIXI.Text("Swap Controls", style)
+    t.position.x = w / 2 - t.width / 2
+    t.position.y = h / 2 - t.height / 2
+    c.addChild(t)
+    rt.render(c)
+    swap_selected = rt
+
+    @swap_box = new PIXI.Sprite(swap)
+    @swap_box.interactive = true
+    @swap_box.hitArea = new PIXI.Rectangle(0, 0, w, h)
+    @swap_box.mouseover = (data) ->
+      @setTexture(swap_selected)
+    @swap_box.mouseout = (data) ->
+      @setTexture(swap)
+    @swap_box.click = (data) =>
+      @_swapControls()
+    x = cx / 4 - 13
+    y = cy * 0.9
+    @swap_box.x = Math.round(x)
+    @swap_box.y = Math.round(y)
 
     rt = new PIXI.RenderTexture(76, 26)
     c = new PIXI.DisplayObjectContainer()
@@ -718,6 +767,7 @@ class Game
     @hud_stage.removeChild(@player1_text)
     @hud_stage.removeChild(@player2_text)
     @hud_stage.removeChild(@controls1)
+    @hud_stage.removeChild(@swap_box)
 
     @hud_stage.removeChild(@h_stat_text)
     @hud_stage.removeChild(@h_wins_text)
@@ -832,6 +882,7 @@ class Game
     @hud_stage.addChild(@controls1)
     if @_player2_type is "human"
       @hud_stage.addChild(@controls2)
+    @hud_stage.addChild(@swap_box)
     @hud_stage.addChild(@human_box)
     @hud_stage.addChild(@ai_norm_box)
     @hud_stage.addChild(@ai_hard_box)
@@ -921,25 +972,45 @@ class Game
     if @state is @states.GAME
       switch key_code
         when bindings.P1_UP
-          @left_paddle.startUp()
-        when bindings.P1_DOWN
-          @left_paddle.startDown()
-        when bindings.P1_LEFT
-          @left_paddle.startLeft()
-        when bindings.P1_RIGHT
-          @left_paddle.startRight()
-        when bindings.P2_UP
-          if @_player2_type is "human"
+          if @_wasd_1
+            @left_paddle.startUp()
+          else if @_player2_type is "human"
             @right_paddle.startUp()
-        when bindings.P2_DOWN
-          if @_player2_type is "human"
+        when bindings.P1_DOWN
+          if @_wasd_1
+            @left_paddle.startDown()
+          else if @_player2_type is "human"
             @right_paddle.startDown()
-        when bindings.P2_LEFT
-          if @_player2_type is "human"
+        when bindings.P1_LEFT
+          if @_wasd_1
+            @left_paddle.startLeft()
+          else if @_player2_type is "human"
             @right_paddle.startLeft()
-        when bindings.P2_RIGHT
-          if @_player2_type is "human"
+        when bindings.P1_RIGHT
+          if @_wasd_1
+            @left_paddle.startRight()
+          else if @_player2_type is "human"
             @right_paddle.startRight()
+        when bindings.P2_UP
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.startUp()
+          else
+            @left_paddle.startUp()
+        when bindings.P2_DOWN
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.startDown()
+          else
+            @left_paddle.startDown()
+        when bindings.P2_LEFT
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.startLeft()
+          else
+            @left_paddle.startLeft()
+        when bindings.P2_RIGHT
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.startRight()
+          else
+            @left_paddle.startRight()
 
     if key_code is bindings.START
       switch @state
@@ -956,26 +1027,46 @@ class Game
     if @state isnt @states.GAME then return
     bindings = settings.BINDINGS
     switch key_code
-      when bindings.P1_UP
-        @left_paddle.endUp()
-      when bindings.P1_DOWN
-        @left_paddle.endDown()
-      when bindings.P1_LEFT
-        @left_paddle.endLeft()
-      when bindings.P1_RIGHT
-        @left_paddle.endRight()
-      when bindings.P2_UP
-        if @_player2_type is "human"
-          @right_paddle.endUp()
-      when bindings.P2_DOWN
-        if @_player2_type is "human"
-          @right_paddle.endDown()
-      when bindings.P2_LEFT
-        if @_player2_type is "human"
-          @right_paddle.endLeft()
-      when bindings.P2_RIGHT
-        if @_player2_type is "human"
-          @right_paddle.endRight()
+        when bindings.P1_UP
+          if @_wasd_1
+            @left_paddle.endUp()
+          else if @_player2_type is "human"
+            @right_paddle.endUp()
+        when bindings.P1_DOWN
+          if @_wasd_1
+            @left_paddle.endDown()
+          else if @_player2_type is "human"
+            @right_paddle.endDown()
+        when bindings.P1_LEFT
+          if @_wasd_1
+            @left_paddle.endLeft()
+          else if @_player2_type is "human"
+            @right_paddle.endLeft()
+        when bindings.P1_RIGHT
+          if @_wasd_1
+            @left_paddle.endRight()
+          else if @_player2_type is "human"
+            @right_paddle.endRight()
+        when bindings.P2_UP
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.endUp()
+          else
+            @left_paddle.endUp()
+        when bindings.P2_DOWN
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.endDown()
+          else
+            @left_paddle.endDown()
+        when bindings.P2_LEFT
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.endLeft()
+          else
+            @left_paddle.endLeft()
+        when bindings.P2_RIGHT
+          if @_wasd_1 and @_player2_type is "human"
+            @right_paddle.endRight()
+          else
+            @left_paddle.endRight()
 
   onMouseDown: (button, screen_pos) ->
 
@@ -1066,3 +1157,23 @@ class Game
     if not val
       val = "0"
     return parseInt(val)
+
+  _swapControls: () ->
+    @_wasd_1 = not @_wasd_1
+    x = @controls1.position.x
+    @controls1.position.x = @controls2.position.x
+    @controls2.position.x = x
+
+    visible_1 = @controls1 in @hud_stage.children
+    visible_2 = @controls2 in @hud_stage.children
+
+    if not visible_1 and visible_2
+      @hud_stage.addChild(@controls1)
+      @hud_stage.removeChild(@controls2)
+    else if visible_1 and not visible_2
+      @hud_stage.addChild(@controls2)
+      @hud_stage.removeChild(@controls1)
+
+    c = @controls1
+    @controls1 = @controls2
+    @controls2 = c
