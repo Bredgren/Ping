@@ -1,5 +1,5 @@
 
-class NormalAI
+class HardAI
   _in_range: false
 
   constructor: (@game) ->
@@ -15,18 +15,30 @@ class NormalAI
 
     range = 5.0
 
-    if ball_vel.x > 0 or ball_pos.x > paddle_pos.x - range
-      padding = Math.random() * 3.5 + 0.8
+    # Moveing toward us
+    if ball_vel.x > 0
+      y = @_getExpectedY(ball_pos, ball_vel)
+      h = settings.HEIGHT / settings.PPM
+      while not (0 <= y <= h)
+        if y < 0
+          y = -y
+        else if y > h
+          y = 2 * h - y
+      padding = Math.random() * 3.0 + 0.5
 
-      if ball_pos.y > paddle_pos.y + padding
+      if y > paddle_pos.y + padding
         paddle.endUp()
         paddle.startDown()
-      else if ball_pos.y < paddle_pos.y - padding
+      else if y < paddle_pos.y - padding
         paddle.endDown()
         paddle.startUp()
       else
         paddle.endUp()
         paddle.endDown()
+
+    # Moving away but is close
+    # if ball_pos.x > paddle_pos.x - range
+    #   a = 6
 
     padding = Math.random() * range - 1.5
     if ball_pos.x > paddle_pos.x - padding and not @_in_range
@@ -45,3 +57,18 @@ class NormalAI
       @_in_range = false
       paddle.endLeft()
       paddle.endRight()
+
+  _getExpectedY: (pos, vel) ->
+    dir = vel.Copy()
+    dir.Normalize()
+    p = dir.Copy()
+    s = 1
+    p.Multiply(s)
+    p.Add(pos)
+    while p.x < (settings.WIDTH / settings.PPM)
+      p = dir.Copy()
+      s += 0.1
+      p.Multiply(s)
+      p.Add(pos)
+
+    return p.y

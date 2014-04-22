@@ -30,8 +30,8 @@ settings = {
     X: 20  # pixels from the edge
     LENGTH: 75
     WIDTH: 10
-    MOVE_FORCE: 200
-    MAX_VEL: 100
+    MOVE_FORCE: 80
+    MAX_VEL: 60
     ANGLE: 20
     DAMPING_MOVE: 0
     DAMPING_STILL: 10

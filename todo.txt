@@ -1,7 +1,5 @@
 (lower volume)
-
-
-- Add menu for swapping controls    
+  
 - improve AI and add hard AI
 - add menu for choosing balls
 - add ability to unlock balls

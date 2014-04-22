@@ -1,6 +1,7 @@
 
 #_require ./ball
 #_require ./debug_draw
+#_require ./hard_ai
 #_require ./normal_ai
 #_require ./paddle
 #_require ./settings
@@ -587,7 +588,7 @@ class Game
     fix.SetFilterData(f)
 
     @_normal_ai = new NormalAI(@)
-    #@_hard_ai = new HardAI(@)
+    @_hard_ai = new HardAI(@)
 
     # Circle Ball
     g = new PIXI.Graphics()
@@ -714,8 +715,7 @@ class Game
       if @_player2_type is "normal ai"
         @_normal_ai.update()
       if @_player2_type is "hard ai"
-        @_normal_ai.update()
-        # @_hard_ai.update()
+        @_hard_ai.update()
       @right_paddle.update()
       @ball.update()
       @world.Step(
@@ -1027,46 +1027,46 @@ class Game
     if @state isnt @states.GAME then return
     bindings = settings.BINDINGS
     switch key_code
-        when bindings.P1_UP
-          if @_wasd_1
-            @left_paddle.endUp()
-          else if @_player2_type is "human"
-            @right_paddle.endUp()
-        when bindings.P1_DOWN
-          if @_wasd_1
-            @left_paddle.endDown()
-          else if @_player2_type is "human"
-            @right_paddle.endDown()
-        when bindings.P1_LEFT
-          if @_wasd_1
-            @left_paddle.endLeft()
-          else if @_player2_type is "human"
-            @right_paddle.endLeft()
-        when bindings.P1_RIGHT
-          if @_wasd_1
-            @left_paddle.endRight()
-          else if @_player2_type is "human"
-            @right_paddle.endRight()
-        when bindings.P2_UP
-          if @_wasd_1 and @_player2_type is "human"
-            @right_paddle.endUp()
-          else
-            @left_paddle.endUp()
-        when bindings.P2_DOWN
-          if @_wasd_1 and @_player2_type is "human"
-            @right_paddle.endDown()
-          else
-            @left_paddle.endDown()
-        when bindings.P2_LEFT
-          if @_wasd_1 and @_player2_type is "human"
-            @right_paddle.endLeft()
-          else
-            @left_paddle.endLeft()
-        when bindings.P2_RIGHT
-          if @_wasd_1 and @_player2_type is "human"
-            @right_paddle.endRight()
-          else
-            @left_paddle.endRight()
+      when bindings.P1_UP
+        if @_wasd_1
+          @left_paddle.endUp()
+        else if @_player2_type is "human"
+          @right_paddle.endUp()
+      when bindings.P1_DOWN
+        if @_wasd_1
+          @left_paddle.endDown()
+        else if @_player2_type is "human"
+          @right_paddle.endDown()
+      when bindings.P1_LEFT
+        if @_wasd_1
+          @left_paddle.endLeft()
+        else if @_player2_type is "human"
+          @right_paddle.endLeft()
+      when bindings.P1_RIGHT
+        if @_wasd_1
+          @left_paddle.endRight()
+        else if @_player2_type is "human"
+          @right_paddle.endRight()
+      when bindings.P2_UP
+        if @_wasd_1 and @_player2_type is "human"
+          @right_paddle.endUp()
+        else
+          @left_paddle.endUp()
+      when bindings.P2_DOWN
+        if @_wasd_1 and @_player2_type is "human"
+          @right_paddle.endDown()
+        else
+          @left_paddle.endDown()
+      when bindings.P2_LEFT
+        if @_wasd_1 and @_player2_type is "human"
+          @right_paddle.endLeft()
+        else
+          @left_paddle.endLeft()
+      when bindings.P2_RIGHT
+        if @_wasd_1 and @_player2_type is "human"
+          @right_paddle.endRight()
+        else
+          @left_paddle.endRight()
 
   onMouseDown: (button, screen_pos) ->
 
