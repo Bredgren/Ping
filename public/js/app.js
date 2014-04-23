@@ -1575,15 +1575,19 @@
       if (quit) {
         this.victor_text.setText("  No one wins!");
         key += " quits";
+        ga('set', 'metric4', 1);
       } else if (this.left_score > this.right_score) {
         this.victor_text.setText("Player 1 Wins!");
         key += " wins";
+        ga('set', 'metric1', 1);
       } else if (this.left_score < this.right_score) {
         this.victor_text.setText("Player 2 Wins!");
         key += " losses";
+        ga('set', 'metric2', 1);
       } else {
         this.victor_text.setText("Player 3 Wins?!");
         key += " ties";
+        ga('set', 'metric3', 1);
       }
       this._incSaveItem(key);
       if (!quit) {
@@ -1839,7 +1843,8 @@
 
     Game.prototype._onSelectHuman = function() {
       this._player2_type = "human";
-      return this.hud_stage.addChild(this.controls2);
+      this.hud_stage.addChild(this.controls2);
+      return ga('set', 'dimension1', "Human");
     };
 
     Game.prototype._onSelectNormAI = function() {
@@ -1847,8 +1852,9 @@
 
       this._player2_type = "normal ai";
       if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
-        return this.hud_stage.removeChild(this.controls2);
+        this.hud_stage.removeChild(this.controls2);
       }
+      return ga('set', 'dimension1', "Normal AI");
     };
 
     Game.prototype._onSelectHardAI = function() {
@@ -1856,8 +1862,9 @@
 
       this._player2_type = "hard ai";
       if (_ref = this.controls2, __indexOf.call(this.hud_stage.children, _ref) >= 0) {
-        return this.hud_stage.removeChild(this.controls2);
+        this.hud_stage.removeChild(this.controls2);
       }
+      return ga('set', 'dimension1', "Hard AI");
     };
 
     Game.prototype._checkContacts = function() {

@@ -1,6 +1,5 @@
 (lower volume)
-  
-- improve AI and add hard AI
+
 - add menu for choosing balls
 - add ability to unlock balls
     - once all balls are unlocked, also unlock settings gui
@@ -16,3 +15,34 @@
     - volume
 
 - fine-tune controls again?
+
+- production build
+- icon
+
+Game type
+var dimensionValue = 'SOME_DIMENSION_VALUE';
+ga('set', 'dimension1', dimensionValue);
+
+Unlock type
+var dimensionValue = 'SOME_DIMENSION_VALUE';
+ga('set', 'dimension2', dimensionValue);
+
+Wins
+var metricValue = '123';
+ga('set', 'metric1', metricValue);
+
+Losses
+var metricValue = '123';
+ga('set', 'metric2', metricValue);
+
+Ties
+var metricValue = '123';
+ga('set', 'metric3', metricValue);
+
+Quits
+var metricValue = '123';
+ga('set', 'metric4', metricValue);
+
+Unlocks
+var metricValue = '123';
+ga('set', 'metric5', metricValue);

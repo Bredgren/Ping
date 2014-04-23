@@ -849,15 +849,19 @@ class Game
     if quit
       @victor_text.setText("  No one wins!")
       key += " quits"
+      ga('set', 'metric4', 1)
     else if @left_score > @right_score
       @victor_text.setText("Player 1 Wins!")
       key += " wins"
+      ga('set', 'metric1', 1)
     else if @left_score < @right_score
       @victor_text.setText("Player 2 Wins!")
       key += " losses"
+      ga('set', 'metric2', 1)
     else
       @victor_text.setText("Player 3 Wins?!")
       key += " ties"
+      ga('set', 'metric3', 1)
     @_incSaveItem(key)
     if not quit
       key = @_player2_type + " total 1"
@@ -1079,16 +1083,19 @@ class Game
   _onSelectHuman: () ->
     @_player2_type = "human"
     @hud_stage.addChild(@controls2)
+    ga('set', 'dimension1', "Human")
 
   _onSelectNormAI: () ->
     @_player2_type = "normal ai"
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
+    ga('set', 'dimension1', "Normal AI")
 
   _onSelectHardAI: () ->
     @_player2_type = "hard ai"
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
+    ga('set', 'dimension1', "Hard AI")
 
   _checkContacts: () ->
     contact = @world.GetContactList()
