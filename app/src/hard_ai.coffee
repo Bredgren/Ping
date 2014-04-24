@@ -61,14 +61,5 @@ class HardAI
   _getExpectedY: (pos, vel) ->
     dir = vel.Copy()
     dir.Normalize()
-    p = dir.Copy()
-    s = 1
-    p.Multiply(s)
-    p.Add(pos)
-    while p.x < (settings.WIDTH / settings.PPM)
-      p = dir.Copy()
-      s += 0.1
-      p.Multiply(s)
-      p.Add(pos)
-
-    return p.y
+    s = (settings.WIDTH / settings.PPM - pos.x) / dir.x
+    return s * dir.y + pos.y
