@@ -626,7 +626,7 @@ class Game
     @_cir = _polyButton(x, y, size, 0)
     x += (size + padding) * 2 + margin
     @_oct = _polyButton(x, y, size, 8)
-    @_oct_lock = _lockText(x, y, size, "Best >= 8 Normal AI")
+    @_oct_lock = _lockText(x, y, size, "Total > 80 Normal AI")
     x += (size + padding) * 2 + margin
     @_hep = _polyButton(x, y, size, 7)
     @_hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI ")
@@ -636,13 +636,13 @@ class Game
     x = cx / 4
     y += (size + padding) * 2 + margin
     @_pen = _polyButton(x, y, size, 5)
-    @_pen_lock = _lockText(x, y, size, "Best >= 50 rounds Normal AI ")
+    @_pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI ")
     x += (size + padding) * 2 + margin
     @_sqr = _polyButton(x, y, size, 4)
-    @_sqr_lock = _lockText(x, y, size, " ")
+    @_sqr_lock = _lockText(x, y, size, "Win 4 rounds Hard AI ")
     x += (size + padding) * 2 + margin
     @_tri = _polyButton(x, y, size, 3)
-    @_tri_lock = _lockText(x, y, size, "Best >= 30 Normal AI ", 2)
+    @_tri_lock = _lockText(x, y, size, "Best > 30 Normal AI ", 2)
 
     @_cir.setSelected(true)
 
