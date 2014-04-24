@@ -518,6 +518,7 @@ class Game
 
     padding = 10
     margin = 10
+    ball_buttons = []
     _polyButton = (x, y, size, sides) =>
       if sides > 2
         poly = @_getPolygon(sides, size  / settings.PPM)
@@ -533,7 +534,7 @@ class Game
       g.lineStyle(1, 0xFFFFFF)
       g.drawRect(0, 0, size, size)
       if sides > 2
-        @_drawPolygon(poly, g, size / 2, size / 2)
+        @_drawPolygon(poly, g, size / 2, size / 2)  #
       else
         g.lineStyle(2, 0xFFFFFF)
         g.drawCircle(size / 2, size / 2, r)
@@ -578,47 +579,72 @@ class Game
       button_box.mouseout = (data) ->
         if not @selected
           @setTexture(button)
+      i = ball_buttons.length
+      button_box.click = (data) =>
+        b.setSelected(false) for b in ball_buttons
+        data.target.setSelected(true)
+        @ball_type = i
       button_box.x = Math.round(x - button_box.width / 2)
-      button_box.y = Math.round(y - button_box.height / 2)
+      button_box.y = Math.round(y - button_box.height / 2)  #
+      ball_buttons.push(button_box)
 
       return button_box
 
-    x = cx / 4
-    y = cy * 1.25
+    _lockText = (x, y, size, text, tx=5, ty=5) ->
+      size = (size + padding) * 2
+
+      rt = new PIXI.RenderTexture(size + 1, size + 1)
+      c = new PIXI.DisplayObjectContainer()
+
+      g = new PIXI.Graphics()
+      g.lineStyle(1, 0xFFFFFF)
+      g.drawRect(0, 0, size, size)
+      c.addChild(g)
+      style = {
+        font: "9px Arial",
+        fill: "#FFFFFF",
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: size - tx}
+      t = new PIXI.Text(text, style)
+      t.position.x = tx
+      t.position.y = ty
+      c.addChild(t)
+      rt.render(c)
+      box = rt
+
+      locked_box = new PIXI.Sprite(box)
+      locked_box.x = Math.round(x - locked_box.width / 2)  #
+      locked_box.y = Math.round(y - locked_box.height / 2)  #
+
+      return locked_box
+
+    x = cx / 4  #
+    y = cy * 1.4
     size = settings.BALL.SIZE
 
-    cir = _polyButton(x, y, size, 0)
+    @_cir = _polyButton(x, y, size, 0)
     x += (size + padding) * 2 + margin
-    oct = _polyButton(x, y, size, 8)
+    @_oct = _polyButton(x, y, size, 8)
+    @_oct_lock = _lockText(x, y, size, "Best >= 8 Normal AI")
     x += (size + padding) * 2 + margin
-    hep = _polyButton(x, y, size, 7)
+    @_hep = _polyButton(x, y, size, 7)
+    @_hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI ")
     x += (size + padding) * 2 + margin
-    hex = _polyButton(x, y, size, 6)
+    @_hex = _polyButton(x, y, size, 6)
+    @_hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI ")
     x = cx / 4
     y += (size + padding) * 2 + margin
-    pen = _polyButton(x, y, size, 5)
+    @_pen = _polyButton(x, y, size, 5)
+    @_pen_lock = _lockText(x, y, size, "Best >= 50 rounds Normal AI ")
     x += (size + padding) * 2 + margin
-    sqr = _polyButton(x, y, size, 4)
+    @_sqr = _polyButton(x, y, size, 4)
+    @_sqr_lock = _lockText(x, y, size, " ")
     x += (size + padding) * 2 + margin
-    tri = _polyButton(x, y, size, 3)
+    @_tri = _polyButton(x, y, size, 3)
+    @_tri_lock = _lockText(x, y, size, "Best >= 30 Normal AI ", 2)
 
-    # b2 = _polyButton(x+size+5, y, size, 5)
-
-    # b.click = (data) ->
-    #   b2.setSelected(false)
-    #   data.target.setSelected(true)
-
-    # b2.click = (data) ->
-    #   b.setSelected(false)
-    #   data.target.setSelected(true)
-
-    @hud_stage.addChild(cir)
-    @hud_stage.addChild(oct)
-    @hud_stage.addChild(hep)
-    @hud_stage.addChild(hex)
-    @hud_stage.addChild(pen)
-    @hud_stage.addChild(sqr)
-    @hud_stage.addChild(tri)
+    @_cir.setSelected(true)
 
     @world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep=false)
     if settings.DEBUG_DRAW
@@ -633,10 +659,10 @@ class Game
         b2DebugDraw.e_pairBit | b2DebugDraw.e_aabbBit)
       @world.SetDebugDraw(debug_drawer)
 
-    b2_w = settings.WIDTH / settings.PPM
+    b2_w = settings.WIDTH / settings.PPM  #
     b2_h = 1
-    offset = b2_h / 2
-    b2_x = b2_w / 2
+    offset = b2_h / 2  #
+    b2_x = b2_w / 2  #
     b2_y = -offset
     bodyDef = new b2Dynamics.b2BodyDef()
     bodyDef.type = b2Dynamics.b2Body.b2_staticBody
@@ -905,6 +931,37 @@ class Game
     if @sfx_box in @hud_stage.children
       @hud_stage.removeChild(@sfx_box)
 
+    @hud_stage.removeChild(@_cir)
+    if @_oct in @hud_stage.children
+      @hud_stage.removeChild(@_oct)
+    if @_oct_lock in @hud_stage.children
+      @hud_stage.removeChild(@_oct_lock)
+
+    if @_hep in @hud_stage.children
+      @hud_stage.removeChild(@_hep)
+    if @_hep_lock in @hud_stage.children
+      @hud_stage.removeChild(@_hep_lock)
+
+    if @_hex in @hud_stage.children
+      @hud_stage.removeChild(@_hex)
+    if @_hex_lock in @hud_stage.children
+      @hud_stage.removeChild(@_hex_lock)
+
+    if @_pen in @hud_stage.children
+      @hud_stage.removeChild(@_pen)
+    if @_pen_lock in @hud_stage.children
+      @hud_stage.removeChild(@_pen_lock)
+
+    if @_sqr in @hud_stage.children
+      @hud_stage.removeChild(@_sqr)
+    if @_sqr_lock in @hud_stage.children
+      @hud_stage.removeChild(@_sqr_lock)
+
+    if @_tri in @hud_stage.children
+      @hud_stage.removeChild(@_tri)
+    if @_tri_lock in @hud_stage.children
+      @hud_stage.removeChild(@_tri_lock)
+
     @hud_stage.addChild(@quit_text)
     @hud_stage.addChild(@countdown_text)
 
@@ -1072,6 +1129,37 @@ class Game
       @hud_stage.removeChild(@right_score_text)
     if @victor_text in @hud_stage.children
       @hud_stage.removeChild(@victor_text)
+
+    @hud_stage.addChild(@_cir)
+    if @_getSaveItemInt('oct') is 1
+      @hud_stage.addChild(@_oct)
+    else
+      @hud_stage.addChild(@_oct_lock)
+
+    if @_getSaveItemInt('hep') is 1
+      @hud_stage.addChild(@_hep)
+    else
+      @hud_stage.addChild(@_hep_lock)
+
+    if @_getSaveItemInt('hex') is 1
+      @hud_stage.addChild(@_hex)
+    else
+      @hud_stage.addChild(@_hex_lock)
+
+    if @_getSaveItemInt('pen') is 1
+      @hud_stage.addChild(@_pen)
+    else
+      @hud_stage.addChild(@_pen_lock)
+
+    if @_getSaveItemInt('sqr') is 1
+      @hud_stage.addChild(@_sqr)
+    else
+      @hud_stage.addChild(@_sqr_lock)
+
+    if @_getSaveItemInt('tri') is 1
+      @hud_stage.addChild(@_tri)
+    else
+      @hud_stage.addChild(@_tri_lock)
 
     @_start_time = @_fade_time
 

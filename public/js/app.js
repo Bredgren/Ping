@@ -712,7 +712,7 @@
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, cir, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, hep, hex, human, human_selected, margin, oct, offset, padding, pen, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, size, sprite, sqr, stat_y, style, swap, swap_selected, t, tri, w, x, y, _i, _polyButton,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, ball_buttons, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, margin, offset, padding, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, size, sprite, stat_y, style, swap, swap_selected, t, w, x, y, _i, _lockText, _polyButton,
         _this = this;
 
       this.stage = stage;
@@ -1225,8 +1225,9 @@
       this.score_grad.anchor.y = 11 / this.score_grad.height;
       padding = 10;
       margin = 10;
+      ball_buttons = [];
       _polyButton = function(x, y, size, sides) {
-        var button, button_box, button_selected, poly, r;
+        var button, button_box, button_selected, i, poly, r;
 
         if (sides > 2) {
           poly = _this._getPolygon(sides, size / settings.PPM);
@@ -1290,34 +1291,80 @@
             return this.setTexture(button);
           }
         };
+        i = ball_buttons.length;
+        button_box.click = function(data) {
+          var b, _j, _len;
+
+          for (_j = 0, _len = ball_buttons.length; _j < _len; _j++) {
+            b = ball_buttons[_j];
+            b.setSelected(false);
+          }
+          data.target.setSelected(true);
+          return _this.ball_type = i;
+        };
         button_box.x = Math.round(x - button_box.width / 2);
         button_box.y = Math.round(y - button_box.height / 2);
+        ball_buttons.push(button_box);
         return button_box;
       };
+      _lockText = function(x, y, size, text, tx, ty) {
+        var box, locked_box;
+
+        if (tx == null) {
+          tx = 5;
+        }
+        if (ty == null) {
+          ty = 5;
+        }
+        size = (size + padding) * 2;
+        rt = new PIXI.RenderTexture(size + 1, size + 1);
+        c = new PIXI.DisplayObjectContainer();
+        g = new PIXI.Graphics();
+        g.lineStyle(1, 0xFFFFFF);
+        g.drawRect(0, 0, size, size);
+        c.addChild(g);
+        style = {
+          font: "9px Arial",
+          fill: "#FFFFFF",
+          align: 'left',
+          wordWrap: true,
+          wordWrapWidth: size - tx
+        };
+        t = new PIXI.Text(text, style);
+        t.position.x = tx;
+        t.position.y = ty;
+        c.addChild(t);
+        rt.render(c);
+        box = rt;
+        locked_box = new PIXI.Sprite(box);
+        locked_box.x = Math.round(x - locked_box.width / 2);
+        locked_box.y = Math.round(y - locked_box.height / 2);
+        return locked_box;
+      };
       x = cx / 4;
-      y = cy * 1.25;
+      y = cy * 1.4;
       size = settings.BALL.SIZE;
-      cir = _polyButton(x, y, size, 0);
+      this._cir = _polyButton(x, y, size, 0);
       x += (size + padding) * 2 + margin;
-      oct = _polyButton(x, y, size, 8);
+      this._oct = _polyButton(x, y, size, 8);
+      this._oct_lock = _lockText(x, y, size, "Best >= 8 Normal AI");
       x += (size + padding) * 2 + margin;
-      hep = _polyButton(x, y, size, 7);
+      this._hep = _polyButton(x, y, size, 7);
+      this._hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI ");
       x += (size + padding) * 2 + margin;
-      hex = _polyButton(x, y, size, 6);
+      this._hex = _polyButton(x, y, size, 6);
+      this._hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI ");
       x = cx / 4;
       y += (size + padding) * 2 + margin;
-      pen = _polyButton(x, y, size, 5);
+      this._pen = _polyButton(x, y, size, 5);
+      this._pen_lock = _lockText(x, y, size, "Best >= 50 rounds Normal AI ");
       x += (size + padding) * 2 + margin;
-      sqr = _polyButton(x, y, size, 4);
+      this._sqr = _polyButton(x, y, size, 4);
+      this._sqr_lock = _lockText(x, y, size, " ");
       x += (size + padding) * 2 + margin;
-      tri = _polyButton(x, y, size, 3);
-      this.hud_stage.addChild(cir);
-      this.hud_stage.addChild(oct);
-      this.hud_stage.addChild(hep);
-      this.hud_stage.addChild(hex);
-      this.hud_stage.addChild(pen);
-      this.hud_stage.addChild(sqr);
-      this.hud_stage.addChild(tri);
+      this._tri = _polyButton(x, y, size, 3);
+      this._tri_lock = _lockText(x, y, size, "Best >= 30 Normal AI ", 2);
+      this._cir.setSelected(true);
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
         debug_drawer = new DebugDraw();
@@ -1578,7 +1625,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, style, t, vel, _ref, _ref1, _ref2, _ref3, _ref4;
+      var center, style, t, vel, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
 
       this.state = this.states.COUNT_DOWN;
       this._count_down = 3;
@@ -1620,6 +1667,43 @@
       }
       if (_ref4 = this.sfx_box, __indexOf.call(this.hud_stage.children, _ref4) >= 0) {
         this.hud_stage.removeChild(this.sfx_box);
+      }
+      this.hud_stage.removeChild(this._cir);
+      if (_ref5 = this._oct, __indexOf.call(this.hud_stage.children, _ref5) >= 0) {
+        this.hud_stage.removeChild(this._oct);
+      }
+      if (_ref6 = this._oct_lock, __indexOf.call(this.hud_stage.children, _ref6) >= 0) {
+        this.hud_stage.removeChild(this._oct_lock);
+      }
+      if (_ref7 = this._hep, __indexOf.call(this.hud_stage.children, _ref7) >= 0) {
+        this.hud_stage.removeChild(this._hep);
+      }
+      if (_ref8 = this._hep_lock, __indexOf.call(this.hud_stage.children, _ref8) >= 0) {
+        this.hud_stage.removeChild(this._hep_lock);
+      }
+      if (_ref9 = this._hex, __indexOf.call(this.hud_stage.children, _ref9) >= 0) {
+        this.hud_stage.removeChild(this._hex);
+      }
+      if (_ref10 = this._hex_lock, __indexOf.call(this.hud_stage.children, _ref10) >= 0) {
+        this.hud_stage.removeChild(this._hex_lock);
+      }
+      if (_ref11 = this._pen, __indexOf.call(this.hud_stage.children, _ref11) >= 0) {
+        this.hud_stage.removeChild(this._pen);
+      }
+      if (_ref12 = this._pen_lock, __indexOf.call(this.hud_stage.children, _ref12) >= 0) {
+        this.hud_stage.removeChild(this._pen_lock);
+      }
+      if (_ref13 = this._sqr, __indexOf.call(this.hud_stage.children, _ref13) >= 0) {
+        this.hud_stage.removeChild(this._sqr);
+      }
+      if (_ref14 = this._sqr_lock, __indexOf.call(this.hud_stage.children, _ref14) >= 0) {
+        this.hud_stage.removeChild(this._sqr_lock);
+      }
+      if (_ref15 = this._tri, __indexOf.call(this.hud_stage.children, _ref15) >= 0) {
+        this.hud_stage.removeChild(this._tri);
+      }
+      if (_ref16 = this._tri_lock, __indexOf.call(this.hud_stage.children, _ref16) >= 0) {
+        this.hud_stage.removeChild(this._tri_lock);
       }
       this.hud_stage.addChild(this.quit_text);
       this.hud_stage.addChild(this.countdown_text);
@@ -1790,6 +1874,37 @@
       }
       if (_ref4 = this.victor_text, __indexOf.call(this.hud_stage.children, _ref4) >= 0) {
         this.hud_stage.removeChild(this.victor_text);
+      }
+      this.hud_stage.addChild(this._cir);
+      if (this._getSaveItemInt('oct') === 1) {
+        this.hud_stage.addChild(this._oct);
+      } else {
+        this.hud_stage.addChild(this._oct_lock);
+      }
+      if (this._getSaveItemInt('hep') === 1) {
+        this.hud_stage.addChild(this._hep);
+      } else {
+        this.hud_stage.addChild(this._hep_lock);
+      }
+      if (this._getSaveItemInt('hex') === 1) {
+        this.hud_stage.addChild(this._hex);
+      } else {
+        this.hud_stage.addChild(this._hex_lock);
+      }
+      if (this._getSaveItemInt('pen') === 1) {
+        this.hud_stage.addChild(this._pen);
+      } else {
+        this.hud_stage.addChild(this._pen_lock);
+      }
+      if (this._getSaveItemInt('sqr') === 1) {
+        this.hud_stage.addChild(this._sqr);
+      } else {
+        this.hud_stage.addChild(this._sqr_lock);
+      }
+      if (this._getSaveItemInt('tri') === 1) {
+        this.hud_stage.addChild(this._tri);
+      } else {
+        this.hud_stage.addChild(this._tri_lock);
       }
       return this._start_time = this._fade_time;
     };
