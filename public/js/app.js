@@ -1341,20 +1341,20 @@
       this._oct_lock = _lockText(x, y, size, "Total > 80 Normal AI");
       x += (size + padding) * 2 + margin;
       this._hep = _polyButton(x, y, size, 7);
-      this._hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI ");
+      this._hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI");
       x += (size + padding) * 2 + margin;
       this._hex = _polyButton(x, y, size, 6);
-      this._hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI ");
+      this._hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI");
       x = cx / 4;
       y += (size + padding) * 2 + margin;
       this._pen = _polyButton(x, y, size, 5);
       this._pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI ");
       x += (size + padding) * 2 + margin;
       this._sqr = _polyButton(x, y, size, 4);
-      this._sqr_lock = _lockText(x, y, size, "Win 4 rounds Hard AI ");
+      this._sqr_lock = _lockText(x, y, size, "Win 4 rounds Hard AI");
       x += (size + padding) * 2 + margin;
       this._tri = _polyButton(x, y, size, 3);
-      this._tri_lock = _lockText(x, y, size, "Best > 30 Normal AI ", 2);
+      this._tri_lock = _lockText(x, y, size, "Best > 30 Normal AI ");
       this._cir.setSelected(true);
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
