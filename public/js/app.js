@@ -712,7 +712,7 @@
     Game.prototype.TIME_TEXT_SIZE = 50;
 
     function Game(stage) {
-      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, human, human_selected, offset, padding, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, sprite, stat_y, style, swap, swap_selected, t, w, x, y, _i,
+      var ai_hard, ai_hard_selected, ai_norm, ai_norm_selected, b2_h, b2_radius, b2_w, b2_x, b2_y, bodyDef, c, cir, count, cx, cy, debug_drawer, doSleep, f, fix, fixDef, fix_def, g, h, hep, hex, human, human_selected, margin, oct, offset, padding, pen, rt, sfx_off, sfx_off_hover, sfx_on, sfx_on_hover, size, sprite, sqr, stat_y, style, swap, swap_selected, t, tri, w, x, y, _i, _polyButton,
         _this = this;
 
       this.stage = stage;
@@ -1223,6 +1223,101 @@
       this.score_grad = new PIXI.Sprite(g.generateTexture());
       this.score_grad.anchor.x = 11 / this.score_grad.width;
       this.score_grad.anchor.y = 11 / this.score_grad.height;
+      padding = 10;
+      margin = 10;
+      _polyButton = function(x, y, size, sides) {
+        var button, button_box, button_selected, poly, r;
+
+        if (sides > 2) {
+          poly = _this._getPolygon(sides, size / settings.PPM);
+        } else {
+          r = size;
+        }
+        size = (size + padding) * 2;
+        rt = new PIXI.RenderTexture(size + 1, size + 1);
+        c = new PIXI.DisplayObjectContainer();
+        g = new PIXI.Graphics();
+        g.lineStyle(1, 0xFFFFFF);
+        g.drawRect(0, 0, size, size);
+        if (sides > 2) {
+          _this._drawPolygon(poly, g, size / 2, size / 2);
+        } else {
+          g.lineStyle(2, 0xFFFFFF);
+          g.drawCircle(size / 2, size / 2, r);
+          g.moveTo(size / 2, size / 2);
+          g.lineTo(size / 2 + r, size / 2);
+        }
+        c.addChild(g);
+        rt.render(c);
+        button = rt;
+        rt = new PIXI.RenderTexture(size + 1, size + 1);
+        c = new PIXI.DisplayObjectContainer();
+        g = new PIXI.Graphics();
+        g.beginFill(0xFFFFFF);
+        g.drawRect(0, 0, size, size);
+        g.endFill();
+        if (sides > 2) {
+          _this._drawPolygon(poly, g, size / 2, size / 2, 0x000000);
+        } else {
+          g.lineStyle(2, 0x000000);
+          g.drawCircle(size / 2, size / 2, r);
+          g.moveTo(size / 2, size / 2);
+          g.lineTo(size / 2 + r, size / 2);
+        }
+        c.addChild(g);
+        rt.render(c);
+        button_selected = rt;
+        button_box = new PIXI.Sprite(button);
+        button_box.interactive = true;
+        button_box.hitArea = new PIXI.Rectangle(0, 0, size, size);
+        button_box.selected = false;
+        button_box.setSelected = function(val) {
+          if (val !== this.selected) {
+            if (val) {
+              this.selected = true;
+              return this.setTexture(button_selected);
+            } else {
+              this.selected = false;
+              return this.setTexture(button);
+            }
+          }
+        };
+        button_box.mouseover = function(data) {
+          return this.setTexture(button_selected);
+        };
+        button_box.mouseout = function(data) {
+          if (!this.selected) {
+            return this.setTexture(button);
+          }
+        };
+        button_box.x = Math.round(x - button_box.width / 2);
+        button_box.y = Math.round(y - button_box.height / 2);
+        return button_box;
+      };
+      x = cx / 4;
+      y = cy * 1.25;
+      size = settings.BALL.SIZE;
+      cir = _polyButton(x, y, size, 0);
+      x += (size + padding) * 2 + margin;
+      oct = _polyButton(x, y, size, 8);
+      x += (size + padding) * 2 + margin;
+      hep = _polyButton(x, y, size, 7);
+      x += (size + padding) * 2 + margin;
+      hex = _polyButton(x, y, size, 6);
+      x = cx / 4;
+      y += (size + padding) * 2 + margin;
+      pen = _polyButton(x, y, size, 5);
+      x += (size + padding) * 2 + margin;
+      sqr = _polyButton(x, y, size, 4);
+      x += (size + padding) * 2 + margin;
+      tri = _polyButton(x, y, size, 3);
+      this.hud_stage.addChild(cir);
+      this.hud_stage.addChild(oct);
+      this.hud_stage.addChild(hep);
+      this.hud_stage.addChild(hex);
+      this.hud_stage.addChild(pen);
+      this.hud_stage.addChild(sqr);
+      this.hud_stage.addChild(tri);
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
         debug_drawer = new DebugDraw();
@@ -1351,20 +1446,29 @@
       return v;
     };
 
-    Game.prototype._drawPolygon = function(poly, g) {
+    Game.prototype._drawPolygon = function(poly, g, x, y, color) {
       var v, v0, _i, _len, _ref;
 
-      g.lineStyle(2, 0xFFFFFF);
+      if (x == null) {
+        x = 0;
+      }
+      if (y == null) {
+        y = 0;
+      }
+      if (color == null) {
+        color = 0xFFFFFF;
+      }
+      g.lineStyle(2, color);
       v0 = poly[0];
-      g.moveTo(v0.x * settings.PPM, v0.y * settings.PPM);
+      g.moveTo(v0.x * settings.PPM + x, v0.y * settings.PPM + y);
       _ref = poly.slice(1);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
-        g.lineTo(v.x * settings.PPM, v.y * settings.PPM);
+        g.lineTo(v.x * settings.PPM + x, v.y * settings.PPM + y);
       }
-      g.lineTo(v0.x * settings.PPM, v0.y * settings.PPM);
-      g.moveTo(0, 0);
-      return g.lineTo(poly[0].x * settings.PPM, poly[0].y * settings.PPM);
+      g.lineTo(v0.x * settings.PPM + x, v0.y * settings.PPM + y);
+      g.moveTo(x, y);
+      return g.lineTo(poly[0].x * settings.PPM + x, poly[0].y * settings.PPM + y);
     };
 
     Game.prototype.update = function() {

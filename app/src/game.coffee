@@ -516,6 +516,110 @@ class Game
     @score_grad.anchor.x = 11 / @score_grad.width
     @score_grad.anchor.y = 11 / @score_grad.height
 
+    padding = 10
+    margin = 10
+    _polyButton = (x, y, size, sides) =>
+      if sides > 2
+        poly = @_getPolygon(sides, size  / settings.PPM)
+      else
+        r = size
+
+      size = (size + padding) * 2
+
+      rt = new PIXI.RenderTexture(size + 1, size + 1)
+      c = new PIXI.DisplayObjectContainer()
+
+      g = new PIXI.Graphics()
+      g.lineStyle(1, 0xFFFFFF)
+      g.drawRect(0, 0, size, size)
+      if sides > 2
+        @_drawPolygon(poly, g, size / 2, size / 2)
+      else
+        g.lineStyle(2, 0xFFFFFF)
+        g.drawCircle(size / 2, size / 2, r)
+        g.moveTo(size / 2, size / 2)
+        g.lineTo(size / 2 + r, size / 2)
+      c.addChild(g)
+      rt.render(c)
+      button = rt
+
+      rt = new PIXI.RenderTexture(size + 1, size + 1)
+      c = new PIXI.DisplayObjectContainer()
+
+      g = new PIXI.Graphics()
+      g.beginFill(0xFFFFFF)
+      g.drawRect(0, 0, size, size)
+      g.endFill()
+      if sides > 2
+        @_drawPolygon(poly, g, size / 2, size / 2, 0x000000)
+      else
+        g.lineStyle(2, 0x000000)
+        g.drawCircle(size / 2, size / 2, r)
+        g.moveTo(size / 2, size / 2)
+        g.lineTo(size / 2 + r, size / 2)
+      c.addChild(g)
+      rt.render(c)
+      button_selected = rt
+
+      button_box = new PIXI.Sprite(button)
+      button_box.interactive = true
+      button_box.hitArea = new PIXI.Rectangle(0, 0, size, size)
+      button_box.selected = false
+      button_box.setSelected = (val) ->
+        if val isnt @selected
+          if val
+            @selected = true
+            @setTexture(button_selected)
+          else
+            @selected = false
+            @setTexture(button)
+      button_box.mouseover = (data) ->
+        @setTexture(button_selected)
+      button_box.mouseout = (data) ->
+        if not @selected
+          @setTexture(button)
+      button_box.x = Math.round(x - button_box.width / 2)
+      button_box.y = Math.round(y - button_box.height / 2)
+
+      return button_box
+
+    x = cx / 4
+    y = cy * 1.25
+    size = settings.BALL.SIZE
+
+    cir = _polyButton(x, y, size, 0)
+    x += (size + padding) * 2 + margin
+    oct = _polyButton(x, y, size, 8)
+    x += (size + padding) * 2 + margin
+    hep = _polyButton(x, y, size, 7)
+    x += (size + padding) * 2 + margin
+    hex = _polyButton(x, y, size, 6)
+    x = cx / 4
+    y += (size + padding) * 2 + margin
+    pen = _polyButton(x, y, size, 5)
+    x += (size + padding) * 2 + margin
+    sqr = _polyButton(x, y, size, 4)
+    x += (size + padding) * 2 + margin
+    tri = _polyButton(x, y, size, 3)
+
+    # b2 = _polyButton(x+size+5, y, size, 5)
+
+    # b.click = (data) ->
+    #   b2.setSelected(false)
+    #   data.target.setSelected(true)
+
+    # b2.click = (data) ->
+    #   b.setSelected(false)
+    #   data.target.setSelected(true)
+
+    @hud_stage.addChild(cir)
+    @hud_stage.addChild(oct)
+    @hud_stage.addChild(hep)
+    @hud_stage.addChild(hex)
+    @hud_stage.addChild(pen)
+    @hud_stage.addChild(sqr)
+    @hud_stage.addChild(tri)
+
     @world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep=false)
     if settings.DEBUG_DRAW
       debug_drawer = new DebugDraw()
@@ -653,15 +757,15 @@ class Game
       angle += step_size
     return v
 
-  _drawPolygon: (poly, g) ->
-    g.lineStyle(2, 0xFFFFFF)
+  _drawPolygon: (poly, g, x=0, y=0, color=0xFFFFFF) ->
+    g.lineStyle(2, color)
     v0 = poly[0]
-    g.moveTo(v0.x * settings.PPM, v0.y * settings.PPM)
+    g.moveTo(v0.x * settings.PPM + x, v0.y * settings.PPM + y)
     for v in poly[1...]
-      g.lineTo(v.x * settings.PPM, v.y * settings.PPM)
-    g.lineTo(v0.x * settings.PPM, v0.y * settings.PPM)
-    g.moveTo(0, 0)
-    g.lineTo(poly[0].x * settings.PPM, poly[0].y * settings.PPM)
+      g.lineTo(v.x * settings.PPM + x, v.y * settings.PPM + y)
+    g.lineTo(v0.x * settings.PPM + x, v0.y * settings.PPM + y)
+    g.moveTo(x, y)
+    g.lineTo(poly[0].x * settings.PPM + x, poly[0].y * settings.PPM + y)
 
   update: () ->
     t = (new Date()).getTime()

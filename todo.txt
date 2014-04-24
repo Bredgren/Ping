@@ -19,6 +19,38 @@
 - production build
 - icon
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Game type
 var dimensionValue = 'SOME_DIMENSION_VALUE';
 ga('set', 'dimension1', dimensionValue);
