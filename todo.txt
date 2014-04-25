@@ -1,7 +1,6 @@
-(lower volume)
 
-- look into firefox display issues
-- consider trying to make it work in IE
+
+
 
 
 
