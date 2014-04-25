@@ -36,6 +36,8 @@ main = ->
   container.css('margin-left', 'auto')
   container.css('width', "#{W}px")
   container.css('height', "#{H}px")
+  if navigator.userAgent.indexOf("Chrome") > 0
+    $('div#browser').remove()
   game_div.append(container)
   game_div.css('width', "#{W}px")
   game_div.css('height', "#{H}px")

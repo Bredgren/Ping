@@ -11,8 +11,12 @@ div.fb-comments {
 }
 
 #button {
-    width: 105px;
+    width: 106px;
     margin: 30px auto;
+}
+
+div#browser {
+    text-align: center;
 }
 
 a#source-button {
