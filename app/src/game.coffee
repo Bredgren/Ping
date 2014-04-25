@@ -1444,14 +1444,6 @@ class Game
             if ball_pos.x > paddle_pos.x
               @_playSound(settings.SOUNDS.PADDLE_CONTACT.ID)
             @_can_score_l = true
-            # # paddle = @left_paddle.paddle_body
-            # ball = @ball.body
-            # # man = new b2Collision.b2WorldManifold()
-            # # contact.GetWorldManifold(man)
-            # # vel_p = ball.GetLinearVelocityFromWorldPoint(
-            # vel = ball.GetLinearVelocity()
-            # if vel.x > 0
-            #   contact.SetEnabled(false)
           else if (bodyA is @right_paddle.paddle_body or
                    bodyB is @right_paddle.paddle_body)
             ball_pos = @ball.position()
@@ -1459,11 +1451,6 @@ class Game
             if ball_pos.x < paddle_pos.x
               @_playSound(settings.SOUNDS.PADDLE_CONTACT.ID)
             @_can_score_r = true
-            # ball = @ball.body
-            # # paddle = @right_paddle.paddle_body
-            # vel = ball.GetLinearVelocity()
-            # if vel.x < 0
-            #   contact.SetEnabled(false)
 
       contact = contact.GetNext()
 
