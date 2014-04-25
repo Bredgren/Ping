@@ -1,7 +1,5 @@
 (lower volume)
 
-- add gui unlock
-- check unlock conditions on end game
 
 - look into firefox display issues
 - consider trying to make it work in IE
