@@ -29,6 +29,22 @@ H = settings.HEIGHT
 
 # The main method for the game
 main = ->
+  toggle = $("div#toggle-comments")
+  toggle.text("Show comments")
+  c = $("div.fb-comments")
+  c.hide()
+  toggle.click(() ->
+    console.log('click')
+    if c.is(":hidden")
+      c.slideDown("slow", () ->
+        toggle.text("Hide comments")
+      )
+    else
+      c.slideUp("slow", () ->
+        toggle.text("Show comments")
+      )
+  )
+
   game_div = $('#game')
 
   container = $('<div>')

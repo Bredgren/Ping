@@ -19,6 +19,16 @@ div#browser {
     text-align: center;
 }
 
+div#toggle-comments {
+    text-align: center;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    padding: 5px 0px;
+    width: 700px;
+    margin: auto;
+    cursor: pointer;
+}
+
 a#source-button {
     padding: 5px 10px;
     border: 1px solid black;
