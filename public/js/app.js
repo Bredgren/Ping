@@ -2199,7 +2199,7 @@
           return main();
         }
       });
-      createjs.Sound.setVolume(0.5);
+      createjs.Sound.setVolume(0.3);
       return createjs.Sound.registerManifest(manifest, settings.AUDIO_PATH);
     }
   });

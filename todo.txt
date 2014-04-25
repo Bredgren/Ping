@@ -1,23 +1,27 @@
 (lower volume)
 
-- add menu for choosing balls
-- add ability to unlock balls
-    - once all balls are unlocked, also unlock settings gui
-- prevent ball from getting stuck behind paddles (contact listener?)
-- make it so you can't score on yourself at all?
-- irregular balls?
+- add gui unlock
+- check unlock conditions on end game
 
 - look into firefox display issues
 - consider trying to make it work in IE
 
-- sudden death on tie?
-- sound effect options
-    - volume
-
-- fine-tune controls again?
-
 - production build
 - icon
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

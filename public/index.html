@@ -20,7 +20,21 @@
   </script>
 </head>
 <body>
-  <div id="game"></div>
+  <div id="fb-root"></div>
+  <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=1381363052149138";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));</script>
+  <div id="game">
+    <noscript>
+      <div class="notification error">
+        It looks like you have JavaScript disabled. Please enable it for this site so you can enjoy our game!
+      </div>
+    </noscript>
+  </div>
   <div id="feedback">
     <h1>Feedback instructions</h1>
     <p>
@@ -67,10 +81,6 @@
   <div id="button">
     <a id="source-button" href="https://github.com/Bredgren/Ping">View Source</a>
   </div>
-  <noscript>
-    <div class="notification error">
-      It looks like you have JavaScript disabled. Please enable it for this site so you can enjoy our game!
-    </div>
-  </noscript>
+  <div class="fb-comments" data-href="http://bredgren.github.io/Ping/public/" data-width="700"></div>
 </body>
 </html>

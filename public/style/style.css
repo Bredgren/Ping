@@ -4,6 +4,12 @@ canvas {
     background-color: black;
 }
 
+div.fb-comments {
+    width: 700px;
+    margin: auto;
+    display: block;
+}
+
 #button {
     width: 101px;
     margin: 30px auto;

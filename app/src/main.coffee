@@ -21,7 +21,7 @@ $ ->
       count++
       if count is manifest.length
         main())
-    createjs.Sound.setVolume(0.5)
+    createjs.Sound.setVolume(0.3)
     createjs.Sound.registerManifest(manifest, settings.AUDIO_PATH)
 
 W = settings.WIDTH
