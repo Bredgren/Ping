@@ -7,7 +7,6 @@
 - consider trying to make it work in IE
 
 - production build
-- icon
 
 
 
