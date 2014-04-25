@@ -54,7 +54,6 @@ main = ->
   gui = new dat.GUI()
   dat.GUI.toggleHide()
   gui.close()
-  gui.add(game, 'ball_type', 0, 6).step(1)
   paddle_folder = gui.addFolder('Paddle')
   paddle_folder.add(settings.PADDLE, 'MOVE_FORCE')
   paddle_folder.add(settings.PADDLE, 'MAX_VEL')
