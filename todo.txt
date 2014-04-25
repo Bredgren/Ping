@@ -1,10 +1,10 @@
 (lower volume)
 
+- metrics
 
 - look into firefox display issues
 - consider trying to make it work in IE
 
-- production build
 
 
 

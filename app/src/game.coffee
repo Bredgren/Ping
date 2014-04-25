@@ -1020,22 +1020,51 @@ class Game
       @hud_stage.removeChild(@countdown_text)
     @hud_stage.addChild(@return_text)
     key = @_player2_type
+    dim = "Human"
+    if @_player2_type is "normal ai"
+      dim = "Normal AI"
+    else if @_player2_type is "hard ai"
+      dim = "Hard AI"
     if quit
       @victor_text.setText("  No one wins!")
       key += " quits"
-      ga('set', 'metric4', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': dim,
+        'eventAction': 'Quit',
+        'dimension1': dim,
+        'metric4', 1
+      })
     else if @left_score > @right_score
       @victor_text.setText("Player 1 Wins!")
       key += " wins"
-      ga('set', 'metric1', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': dim,
+        'eventAction': 'Win',
+        'dimension1': dim,
+        'metric1', 1
+      })
     else if @left_score < @right_score
       @victor_text.setText("Player 2 Wins!")
       key += " losses"
-      ga('set', 'metric2', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': dim,
+        'eventAction': 'Loose',
+        'dimension1': dim,
+        'metric2', 1
+      })
     else
       @victor_text.setText("Player 3 Wins?!")
       key += " ties"
-      ga('set', 'metric3', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': dim,
+        'eventAction': 'Tie',
+        'dimension1': dim,
+        'metric3', 1
+      })
     @_incSaveItem(key)
     if not quit
       key = @_player2_type + " total 1"
@@ -1054,6 +1083,13 @@ class Game
     # Check unlocks
     if @_getSaveItemInt("normal ai total 1") > 80
       @_setSaveItem("oct", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Octagon',
+        'eventAction': 'Unlock',
+        'dimension2': 'Octagon',
+        'metric5', 1
+      })
 
     completed = 0
     completed += @_getSaveItemInt("normal ai wins")
@@ -1064,18 +1100,53 @@ class Game
     completed += @_getSaveItemInt("hard ai ties")
     if completed > 7
       @_setSaveItem("hep", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Heptagon',
+        'eventAction': 'Unlock',
+        'dimension2': 'Heptagon',
+        'metric5', 1
+      })
 
     if @_getSaveItemInt("normal ai wins") >= 6
       @_setSaveItem("hex", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Hexagon',
+        'eventAction': 'Unlock',
+        'dimension2': 'Hexagon',
+        'metric5', 1
+      })
 
     if completed > 50
       @_setSaveItem("pen", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Pentagon',
+        'eventAction': 'Unlock',
+        'dimension2': 'Pentagon',
+        'metric5', 1
+      })
 
     if @left_score >= 4 * Math.max(@right_score, 1)
       @_setSaveItem("sqr", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Square',
+        'eventAction': 'Unlock',
+        'dimension2': 'Square',
+        'metric5', 1
+      })
 
     if @_getSaveItemInt("hard ai wins") >= 3
       @_setSaveItem("tri", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Triangle',
+        'eventAction': 'Unlock',
+        'dimension2': 'Triangle',
+        'metric5', 1
+      })
 
     unlocked = 0
     unlocked += @_getSaveItemInt("oct")
@@ -1086,6 +1157,13 @@ class Game
     unlocked += @_getSaveItemInt("tri")
     if unlocked is 6
       @_setSaveItem("gui", 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'GUI',
+        'eventAction': 'Unlock',
+        'dimension2': 'GUI',
+        'metric5', 1
+      })
 
   gotoMenu: () ->
     @state = @states.MENU
@@ -1329,19 +1407,16 @@ class Game
   _onSelectHuman: () ->
     @_player2_type = "human"
     @hud_stage.addChild(@controls2)
-    ga('set', 'dimension1', "Human")
 
   _onSelectNormAI: () ->
     @_player2_type = "normal ai"
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
-    ga('set', 'dimension1', "Normal AI")
 
   _onSelectHardAI: () ->
     @_player2_type = "hard ai"
     if @controls2 in @hud_stage.children
       @hud_stage.removeChild(@controls2)
-    ga('set', 'dimension1', "Hard AI")
 
   _checkContacts: () ->
     contact = @world.GetContactList()
