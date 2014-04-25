@@ -632,17 +632,20 @@ class Game
     @_hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI")
     x += (size + padding) * 2 + margin
     @_hex = _polyButton(x, y, size, 6)
-    @_hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI")
+    @_hex_lock = _lockText(x, y, size, "Wins >= 6 Normal AI")
     x = cx / 4
     y += (size + padding) * 2 + margin
     @_pen = _polyButton(x, y, size, 5)
-    @_pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI ")
+    @_pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI")
     x += (size + padding) * 2 + margin
     @_sqr = _polyButton(x, y, size, 4)
-    @_sqr_lock = _lockText(x, y, size, "Win 4 rounds Hard AI")
+    @_sqr_lock = _lockText(x, y, size, "Score >= 4x Normal AI score")
     x += (size + padding) * 2 + margin
     @_tri = _polyButton(x, y, size, 3)
-    @_tri_lock = _lockText(x, y, size, "Best > 30 Normal AI ")
+    @_tri_lock = _lockText(x, y, size, "Wins >= 3 Hard AI")
+    x += (size + padding) * 2 + margin
+    @_gui = _lockText(x, y, size, "Press H to toggle controls")
+    @_gui_lock = _lockText(x, y, size, "Unlock all balls")
 
     @_cir.setSelected(true)
 
@@ -803,6 +806,11 @@ class Game
       if @_start_time > 0
         @hud_stage.alpha = 1 - (@_start_time / @_fade_time)
         @game_stage.alpha = 1 - (@_start_time / @_fade_time)
+      else
+        if @hud_stage.alpha isnt 1
+          @hud_stage.alpha = 1
+        if @game_stage.alpha isnt 1
+          @game_stage.alpha = 1
 
     if @state is @states.COUNT_DOWN
       new_time = @_count_down - dt / 1000
@@ -962,6 +970,11 @@ class Game
     if @_tri_lock in @hud_stage.children
       @hud_stage.removeChild(@_tri_lock)
 
+    if @_gui in @hud_stage.children
+      @hud_stage.removeChild(@_gui)
+    if @_gui_lock in @hud_stage.children
+      @hud_stage.removeChild(@_gui_lock)
+
     @hud_stage.addChild(@quit_text)
     @hud_stage.addChild(@countdown_text)
 
@@ -1037,6 +1050,42 @@ class Game
     @left_paddle.destroy()
     @right_paddle.destroy()
     @ball.destroy()
+
+    # Check unlocks
+    if @_getSaveItemInt("normal ai total 1") > 80
+      @_setSaveItem("oct", 1)
+
+    completed = 0
+    completed += @_getSaveItemInt("normal ai wins")
+    completed += @_getSaveItemInt("normal ai losses")
+    completed += @_getSaveItemInt("normal ai ties")
+    completed += @_getSaveItemInt("hard ai wins")
+    completed += @_getSaveItemInt("hard ai losses")
+    completed += @_getSaveItemInt("hard ai ties")
+    if completed > 7
+      @_setSaveItem("hep", 1)
+
+    if @_getSaveItemInt("normal ai wins") >= 6
+      @_setSaveItem("hex", 1)
+
+    if completed > 50
+      @_setSaveItem("pen", 1)
+
+    if @left_score >= 4 * Math.max(@right_score, 1)
+      @_setSaveItem("sqr", 1)
+
+    if @_getSaveItemInt("hard ai wins") >= 3
+      @_setSaveItem("tri", 1)
+
+    unlocked = 0
+    unlocked += @_getSaveItemInt("oct")
+    unlocked += @_getSaveItemInt("hep")
+    unlocked += @_getSaveItemInt("hex")
+    unlocked += @_getSaveItemInt("pen")
+    unlocked += @_getSaveItemInt("sqr")
+    unlocked += @_getSaveItemInt("tri")
+    if unlocked is 6
+      @_setSaveItem("gui", 1)
 
   gotoMenu: () ->
     @state = @states.MENU
@@ -1160,6 +1209,11 @@ class Game
       @hud_stage.addChild(@_tri)
     else
       @hud_stage.addChild(@_tri_lock)
+
+    if @_getSaveItemInt('gui') is 1
+      @hud_stage.addChild(@_gui)
+    else
+      @hud_stage.addChild(@_gui_lock)
 
     @_start_time = @_fade_time
 

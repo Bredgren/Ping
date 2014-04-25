@@ -368,6 +368,7 @@
       if (ball_vel.x > 0) {
         y = this._getExpectedY(ball_pos, ball_vel);
         h = settings.HEIGHT / settings.PPM;
+        y = Math.max(-100, Math.min(100, y));
         while (!((0 <= y && y <= h))) {
           if (y < 0) {
             y = -y;
@@ -1344,17 +1345,20 @@
       this._hep_lock = _lockText(x, y, size, "Complete 7 rounds against AI");
       x += (size + padding) * 2 + margin;
       this._hex = _polyButton(x, y, size, 6);
-      this._hex_lock = _lockText(x, y, size, "Win 6 rounds Normal AI");
+      this._hex_lock = _lockText(x, y, size, "Wins >= 6 Normal AI");
       x = cx / 4;
       y += (size + padding) * 2 + margin;
       this._pen = _polyButton(x, y, size, 5);
-      this._pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI ");
+      this._pen_lock = _lockText(x, y, size, "Complete 50 rounds against AI");
       x += (size + padding) * 2 + margin;
       this._sqr = _polyButton(x, y, size, 4);
-      this._sqr_lock = _lockText(x, y, size, "Win 4 rounds Hard AI");
+      this._sqr_lock = _lockText(x, y, size, "Score >= 4x Normal AI score");
       x += (size + padding) * 2 + margin;
       this._tri = _polyButton(x, y, size, 3);
-      this._tri_lock = _lockText(x, y, size, "Best > 30 Normal AI ");
+      this._tri_lock = _lockText(x, y, size, "Wins >= 3 Hard AI");
+      x += (size + padding) * 2 + margin;
+      this._gui = _lockText(x, y, size, "Press H to toggle controls");
+      this._gui_lock = _lockText(x, y, size, "Unlock all balls");
       this._cir.setSelected(true);
       this.world = new b2Dynamics.b2World(new b2Vec2(0, 0), doSleep = false);
       if (settings.DEBUG_DRAW) {
@@ -1520,6 +1524,13 @@
         if (this._start_time > 0) {
           this.hud_stage.alpha = 1 - (this._start_time / this._fade_time);
           this.game_stage.alpha = 1 - (this._start_time / this._fade_time);
+        } else {
+          if (this.hud_stage.alpha !== 1) {
+            this.hud_stage.alpha = 1;
+          }
+          if (this.game_stage.alpha !== 1) {
+            this.game_stage.alpha = 1;
+          }
         }
       }
       if (this.state === this.states.COUNT_DOWN) {
@@ -1616,7 +1627,7 @@
     };
 
     Game.prototype.startGame = function() {
-      var center, style, t, vel, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+      var center, style, t, vel, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
 
       this.state = this.states.COUNT_DOWN;
       this._count_down = 3;
@@ -1696,6 +1707,12 @@
       if (_ref16 = this._tri_lock, __indexOf.call(this.hud_stage.children, _ref16) >= 0) {
         this.hud_stage.removeChild(this._tri_lock);
       }
+      if (_ref17 = this._gui, __indexOf.call(this.hud_stage.children, _ref17) >= 0) {
+        this.hud_stage.removeChild(this._gui);
+      }
+      if (_ref18 = this._gui_lock, __indexOf.call(this.hud_stage.children, _ref18) >= 0) {
+        this.hud_stage.removeChild(this._gui_lock);
+      }
       this.hud_stage.addChild(this.quit_text);
       this.hud_stage.addChild(this.countdown_text);
       this.left_paddle = new Paddle(this, settings.PADDLE.X);
@@ -1739,7 +1756,7 @@
     };
 
     Game.prototype.endGame = function(quit) {
-      var best, key, _ref;
+      var best, completed, key, unlocked, _ref;
 
       if (quit == null) {
         quit = false;
@@ -1783,7 +1800,42 @@
       this.hud_stage.addChild(this.victor_text);
       this.left_paddle.destroy();
       this.right_paddle.destroy();
-      return this.ball.destroy();
+      this.ball.destroy();
+      if (this._getSaveItemInt("normal ai total 1") > 80) {
+        this._setSaveItem("oct", 1);
+      }
+      completed = 0;
+      completed += this._getSaveItemInt("normal ai wins");
+      completed += this._getSaveItemInt("normal ai losses");
+      completed += this._getSaveItemInt("normal ai ties");
+      completed += this._getSaveItemInt("hard ai wins");
+      completed += this._getSaveItemInt("hard ai losses");
+      completed += this._getSaveItemInt("hard ai ties");
+      if (completed > 7) {
+        this._setSaveItem("hep", 1);
+      }
+      if (this._getSaveItemInt("normal ai wins") >= 6) {
+        this._setSaveItem("hex", 1);
+      }
+      if (completed > 50) {
+        this._setSaveItem("pen", 1);
+      }
+      if (this.left_score >= 4 * Math.max(this.right_score, 1)) {
+        this._setSaveItem("sqr", 1);
+      }
+      if (this._getSaveItemInt("hard ai wins") >= 3) {
+        this._setSaveItem("tri", 1);
+      }
+      unlocked = 0;
+      unlocked += this._getSaveItemInt("oct");
+      unlocked += this._getSaveItemInt("hep");
+      unlocked += this._getSaveItemInt("hex");
+      unlocked += this._getSaveItemInt("pen");
+      unlocked += this._getSaveItemInt("sqr");
+      unlocked += this._getSaveItemInt("tri");
+      if (unlocked === 6) {
+        return this._setSaveItem("gui", 1);
+      }
     };
 
     Game.prototype.gotoMenu = function() {
@@ -1896,6 +1948,11 @@
         this.hud_stage.addChild(this._tri);
       } else {
         this.hud_stage.addChild(this._tri_lock);
+      }
+      if (this._getSaveItemInt('gui') === 1) {
+        this.hud_stage.addChild(this._gui);
+      } else {
+        this.hud_stage.addChild(this._gui_lock);
       }
       return this._start_time = this._fade_time;
     };
@@ -2228,6 +2285,8 @@
     canvas = $('canvas')[0];
     game = new Game(stage);
     gui = new dat.GUI();
+    dat.GUI.toggleHide();
+    gui.close();
     gui.add(game, 'ball_type', 0, 6).step(1);
     paddle_folder = gui.addFolder('Paddle');
     paddle_folder.add(settings.PADDLE, 'MOVE_FORCE');

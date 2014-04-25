@@ -19,6 +19,7 @@ class HardAI
     if ball_vel.x > 0
       y = @_getExpectedY(ball_pos, ball_vel)
       h = settings.HEIGHT / settings.PPM
+      y = Math.max(-100, Math.min(100, y))
       while not (0 <= y <= h)
         if y < 0
           y = -y
@@ -35,10 +36,6 @@ class HardAI
       else
         paddle.endUp()
         paddle.endDown()
-
-    # Moving away but is close
-    # if ball_pos.x > paddle_pos.x - range
-    #   a = 6
 
     padding = Math.random() * range - 1.5
     if ball_pos.x > paddle_pos.x - padding and not @_in_range
